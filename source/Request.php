@@ -40,7 +40,7 @@ class Request
 		$realUri = sprintf(
 			'%s%s?%s'
 			, $origin
-			, $request['path']
+			, substr($request['path'], 1)
 			, $request['queryString']
 		);
 

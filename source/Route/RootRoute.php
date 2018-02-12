@@ -7,10 +7,10 @@ class RootRoute implements \SeanMorris\Ids\Routable
 		session_write_close();
 
 		return \SeanMorris\ThruPut\Request::handle(
-			'https://dev.letsvue.com'
+			'http://127.0.0.1:3333/'
 			, [
 				'SeanMorris\ThruPut\Adapter\Standard'
-				, 'SeanMorris\ThruPut\Adapter\Xpath'
+				// , 'SeanMorris\ThruPut\Adapter\Xpath'
 				, 'SeanMorris\ThruPut\Adapter\Log'
 			]
 		);
