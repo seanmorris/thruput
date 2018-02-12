@@ -1,0 +1,24 @@
+{
+    "name": "seanmorris/thruput",
+    "authors": [
+        {
+            "name": "Sean Morris",
+            "email": "sean@sean-morris.com"
+        }
+    ],
+    "require": {
+        "seanmorris/ids": "dev-master"
+    },
+    "autoload": {
+        "psr-4": {
+            "SeanMorris\\ThruPut\\Test\\": "test/",
+            "SeanMorris\\ThruPut\\":       "source/"
+        }
+    },
+    "repositories": [
+        {   
+            "type": "vcs",
+            "url":  "git@bitbucket.org:SeanMorris227/ids.git"
+        }
+    ]
+}

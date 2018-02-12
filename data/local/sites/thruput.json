@@ -1,0 +1,13 @@
+{
+	"entrypoint" : "SeanMorris\\ThruPut\\Route\\RootRoute"
+	, "devmode" : true
+	, "databases" : {
+		"main" : {
+			"connection" : "mysql:dbname=thruput;host=localhost;"
+			, "username" : "sean"
+			, "password" : ""
+		}
+	}
+	, "public": "/home/sean/thruput/public"
+	, "logLevel": "info"
+}
