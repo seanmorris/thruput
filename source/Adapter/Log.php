@@ -2,20 +2,17 @@
 namespace SeanMorris\ThruPut\Adapter;
 class Log extends \SeanMorris\ThruPut\Adapter
 {
-	public static function onRequest($request, &$uri)
+	public static function onRequest($request, &$uri, &$headers)
 	{
 		\SeanMorris\Ids\Log::info('Request', $uri);
+		\SeanMorris\Ids\Log::debug($headers);
 		\SeanMorris\Ids\Log::debug($request);
 	}
 
 	public static function onCache(&$cacheHash, $request, $response)
 	{
-		\SeanMorris\Ids\Log::info('Caching');
-		\SeanMorris\Ids\Log::debug(
-			$cacheHash
-			, $request
-			, $response
-		);
+		\SeanMorris\Ids\Log::info('Caching', $cacheHash);
+		\SeanMorris\Ids\Log::debug($request, $response);
 	}
 
 	public static function onResponse($request, $response, $cached = FALSE)

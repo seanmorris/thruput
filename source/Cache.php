@@ -2,9 +2,11 @@
 namespace SeanMorris\ThruPut;
 class Cache
 {
-	protected function __construct()
+	protected function __construct($meta, $handle, $offset)
 	{
-
+		$this->meta   = json_decode($meta);
+		$this->handle = $handle;
+		$this->offset = $offset;
 	}
 
 	public static function store($hash, $response)
@@ -12,11 +14,26 @@ class Cache
 		$_response           = clone $response;
 		$_response->response = clone $_response->response;
 
-		$_response->response->body = base64_encode($_response->response->body);
+		$body = $_response->response->body;
+
+		unset($_response->response->body);
 
 		file_put_contents(
 			static::cachePath($hash)
 			, json_encode($_response, JSON_PRETTY_PRINT)
+				. PHP_EOL
+		);
+
+		file_put_contents(
+			static::cachePath($hash)
+			, '==' . PHP_EOL
+			, FILE_APPEND
+		);
+
+		file_put_contents(
+			static::cachePath($hash)
+			, $body
+			, FILE_APPEND
 		);
 	}
 
@@ -24,18 +41,25 @@ class Cache
 	{
 		if(file_exists(static::cachePath($hash)))
 		{
-			$cache = json_decode(
-				file_get_contents(
-					static::cachePath($hash)
-				)
-			);
+			$cacheFile = static::cachePath($hash);
 
-			if($cache)
+			$cacheHandle = fopen($cacheFile, 'r');
+
+			$metaString = '';
+
+			while($line = fgets($cacheHandle))
 			{
-				$cache->response->body = base64_decode($cache->response->body);
+				if(strlen($line) === 3 && substr($line, 0, 2) == '==')
+				{
+					break;
+				}
+				$metaString .= $line;
 			}
-
-			return $cache;
+			return new static(
+				$metaString
+				, $cacheHandle
+				, ftell($cacheHandle)
+			);
 		}
 	}
 
@@ -59,5 +83,15 @@ class Cache
 			, IDS_VENDOR_ROOT
 			, $hash
 		);
+	}
+
+	public function readOut($callback)
+	{
+		fseek($this->handle, $this->offset);
+
+		while(!feof($this->handle))
+		{
+			$callback(fread($this->handle, 128));
+		}
 	}
 }

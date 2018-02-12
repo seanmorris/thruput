@@ -31,11 +31,6 @@ class Request
 
 		foreach($_SERVER as $k => $v)
 		{
-			if($k == 'HTTP_COOKIE')
-			{
-				continue;
-			}
-
 			if(substr($k, 0, 4) == 'HTTP')
 			{
 				$headers[$k] = $v;
@@ -51,7 +46,7 @@ class Request
 
 		foreach($adaptersRev as $adapterClass)
 		{
-			$adapterClass::onRequest($request, $realUri);
+			$adapterClass::onRequest($request, $realUri, $headers);
 		}
 
 		if($cache)
@@ -60,14 +55,18 @@ class Request
 			{
 				$adapterClass::onResponse(
 					$request
-					, $cache->response
+					, $cache->meta->response
 					, $cacheHash
 				);
 			}
 
-			static::sendHeaders($cache->response->header);
+			static::sendHeaders($cache->meta->response->header);
 
-			return $cache->response->body;
+			$cache->readOut(function($chunk){
+				print $chunk;
+			});
+
+			die;
 		}
 
 		$response = static::curl($realUri, $headers);

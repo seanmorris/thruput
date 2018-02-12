@@ -4,8 +4,10 @@ class RootRoute implements \SeanMorris\Ids\Routable
 {
 	public function _dynamic($router)
 	{
+		session_write_close();
+
 		return \SeanMorris\ThruPut\Request::handle(
-			'http://127.0.0.1:3333'
+			'http://dev.beta.thewhtrbt.com'
 			, [
 				'SeanMorris\ThruPut\Adapter\Standard'
 				, 'SeanMorris\ThruPut\Adapter\Log'
