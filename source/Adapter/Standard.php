@@ -16,27 +16,18 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 	{
 		if(static::$preventCookies)
 		{
-			foreach($response->header as $i => $header)
-			{
-				if(is_array($header) && $header[0] == 'Set-Cookie')
-				{
-					unset($response->header[$i]);
-				}
-			}
+			unset($response->header->{'Set-Cookie'});
 		}
 
 		if($response->header)
 		{
-			$response->header[] = sprintf(
-				'X-THRUPUT-CACHE-HIT: %s' . PHP_EOL
-				, $cached ? 'TRUE' : 'FALSE'
-			);
+			$response->header->{'X-THRUPUT-CACHE-HIT'} = $cached
+				? 'TRUE'
+				: 'FALSE'
+			;
 
-			$cacheHash = sha1(json_encode($request));
-
-			$response->header[] = sprintf(
-				'X-THRUPUT-CACHE-HASH: %s' . PHP_EOL
-				, $cacheHash
+			$response->header->{'X-THRUPUT-CACHE-HASH'} = sha1(
+				json_encode($request)
 			);
 		}
 	}

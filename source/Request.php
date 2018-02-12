@@ -46,18 +46,28 @@ class Request
 
 		foreach($adaptersRev as $adapterClass)
 		{
-			$adapterClass::onRequest($request, $realUri, $headers);
+			$reqRes = $adapterClass::onRequest($request, $realUri, $headers);
+
+			if($reqRes === FALSE)
+			{
+				return FALSE;
+			}
 		}
 
 		if($cache)
 		{
 			foreach($adapters as $adapterClass)
 			{
-				$adapterClass::onResponse(
+				$respRes = $adapterClass::onResponse(
 					$request
 					, $cache->meta->response
 					, $cacheHash
 				);
+
+				if($respRes === FALSE)
+				{
+					return FALSE;
+				}
 			}
 
 			static::sendHeaders($cache->meta->response->header);
@@ -73,25 +83,39 @@ class Request
 
 		foreach($adapters as $adapterClass)
 		{
-			$adapterClass::onCache(
+			$cacheRes = $adapterClass::onCache(
 				$cacheHash
 				, $request
 				, $response
 			);
+
+			if($cacheRes === FALSE)
+			{
+				break;
+			}
 		}
 
-		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
-			'response'  => $response
-			, 'request' => $request
-		]);
+		if($cacheRes !== FALSE)
+		{
+			\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
+				'response'  => $response
+				, 'request' => $request
+			]);			
+		}
+
 
 		foreach($adaptersRev as $adapterClass)
 		{
-			$adapterClass::onResponse(
+			$respRes = $adapterClass::onResponse(
 				$request
 				, $response
 				, FALSE
 			);
+
+			if($respRes === FALSE)
+			{
+				return FALSE;
+			}
 		}
 
 		static::sendHeaders($response->header);
@@ -116,16 +140,25 @@ class Request
 		$header = substr($response, 0, $header_size);
 		$body = substr($response, $header_size);
 
-		$headers = array_filter(
+		$_headers = array_filter(
 			array_map('trim', explode(PHP_EOL, $header))
 		);
 
-		$headers = array_map(
-			function($header) {return explode(': ', $header, 2);}
-			, $headers
+		$_headers = array_map(
+			function($header) {
+				return explode(': ', $header, 2);
+			}
+			, $_headers
 		);
 
+		foreach($_headers as $header)
+		{
+			$headers[$header[0]] = $header[1] ?? NULL;
+		}
+
 		curl_close($ch);
+
+		$headers = (object) $headers;
 
 		return (object)[
 			'header' => $headers
@@ -135,20 +168,18 @@ class Request
 
 	protected static function sendHeaders($headers)
 	{
-		foreach($headers as $header)
+		foreach($headers as $headerName => $header)
 		{
-			if($header[0] == 'Transfer-Encoding')
+			if($headerName == 'Transfer-Encoding')
 			{
 				continue;
 			}
-			if(is_array($header))
-			{
-				header(join(': ', $header) . PHP_EOL);
-			}
-			else
-			{
-				header($header);
-			}
+
+			header(sprintf(
+				'%s: %s' . PHP_EOL
+				, $headerName
+				, $header
+			));
 		}
 	}
 }

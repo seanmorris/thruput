@@ -4,12 +4,12 @@ class Cache
 {
 	protected function __construct($meta, $handle, $offset)
 	{
-		$this->meta   = json_decode($meta);
+		$this->meta   = $meta;
 		$this->handle = $handle;
 		$this->offset = $offset;
 	}
 
-	public static function store($hash, $response)
+	public static function store($hash, $response, $time = 60)
 	{
 		$_response           = clone $response;
 		$_response->response = clone $_response->response;
@@ -17,6 +17,10 @@ class Cache
 		$body = $_response->response->body;
 
 		unset($_response->response->body);
+
+		$_response->meta = (object)[];
+
+		$_response->meta->expiry = time() + $time; 
 
 		file_put_contents(
 			static::cachePath($hash)
@@ -41,22 +45,31 @@ class Cache
 	{
 		if(file_exists(static::cachePath($hash)))
 		{
-			$cacheFile = static::cachePath($hash);
-
+			$cacheFile   = static::cachePath($hash);
 			$cacheHandle = fopen($cacheFile, 'r');
+			$metaString  = '';
+			$meta        = (object)[];
 
-			$metaString = '';
 
 			while($line = fgets($cacheHandle))
 			{
 				if(strlen($line) === 3 && substr($line, 0, 2) == '==')
 				{
-					break;
+					if($meta = json_decode($metaString))
+					{
+						break;						
+					}
 				}
 				$metaString .= $line;
 			}
+
+			if($meta->meta->expiry < time())
+			{
+				return FALSE;
+			}
+
 			return new static(
-				$metaString
+				$meta
 				, $cacheHandle
 				, ftell($cacheHandle)
 			);
@@ -91,7 +104,7 @@ class Cache
 
 		while(!feof($this->handle))
 		{
-			$callback(fread($this->handle, 128));
+			$callback(fread($this->handle, 1024));
 		}
 	}
 }
