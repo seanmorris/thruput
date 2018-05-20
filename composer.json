@@ -7,7 +7,9 @@
         }
     ],
     "require": {
-        "seanmorris/ids": "dev-master"
+        "seanmorris/ids": "dev-master",
+        "megahertz/guzzle-tor": "^1.0",
+        "guzzlehttp/guzzle": "^6.3"
     },
     "autoload": {
         "psr-4": {

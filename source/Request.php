@@ -20,7 +20,7 @@ class Request
 		];
 	}
 
-	public static function handle($origin, $adapters)
+	public static function handle($origin, $client, $adapters)
 	{
 		$request     = static::skeleton();
 		$cacheHash   = sha1(json_encode($request));
@@ -56,12 +56,18 @@ class Request
 
 		if($cache)
 		{
+			\SeanMorris\Ids\Log::debug('CACHE HIT');
+
+			\SeanMorris\Ids\Log::debug($cache);
+
 			foreach($adapters as $adapterClass)
 			{
 				$respRes = $adapterClass::onResponse(
 					$request
 					, $cache->meta->response
+					, $realUri
 					, $cacheHash
+					, TRUE
 				);
 
 				if($respRes === FALSE)
@@ -72,98 +78,77 @@ class Request
 
 			static::sendHeaders($cache->meta->response->header);
 
-			$cache->readOut(function($chunk){
-				print $chunk;
+			$response = $cache->meta->response;
+
+			$return = '';
+
+			$cache->readOut(function($chunk) use(&$return){
+				$return .= $chunk;
 			});
-
-			die;
 		}
-
-		$response = static::curl($realUri, $headers);
-
-		foreach($adapters as $adapterClass)
+		else
 		{
-			$cacheRes = $adapterClass::onCache(
-				$cacheHash
-				, $request
-				, $response
-			);
+			\SeanMorris\Ids\Log::debug('CACHE MISS', $headers);
 
-			if($cacheRes === FALSE)
+			$response = $client::request($realUri);
+
+			$cacheRes = NULL;
+
+			foreach($adapters as $adapterClass)
 			{
-				break;
+				$cacheRes = $adapterClass::onCache(
+					$cacheHash
+					, $request
+					, $response
+					, $realUri
+				);
+
+				if($cacheRes === FALSE)
+				{
+					break;
+				}
 			}
-		}
 
-		if($cacheRes !== FALSE)
-		{
-			\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
-				'response'  => $response
-				, 'request' => $request
-			]);			
-		}
-
-
-		foreach($adaptersRev as $adapterClass)
-		{
-			$respRes = $adapterClass::onResponse(
-				$request
-				, $response
-				, FALSE
-			);
-
-			if($respRes === FALSE)
+			if($cacheRes !== FALSE)
 			{
-				return FALSE;
+				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
+					'response'  => $response
+					, 'request' => $request
+				]);
 			}
+
+			foreach($adaptersRev as $adapterClass)
+			{
+				$respRes = $adapterClass::onResponse(
+					$request
+					, $response
+					, $realUri
+					, FALSE
+				);
+
+				if($respRes === FALSE)
+				{
+					$return = FALSE;
+				}
+			}
+
+			static::sendHeaders($response->header);
+
+			$return = $response->body;
 		}
 
-		static::sendHeaders($response->header);
+		\SeanMorris\Ids\Http\Http::onDisconnect(function()
+			use($request, $response, $cache, $cacheHash, $adapters, $realUri){
 
-		return $response->body;
-	}
-
-	protected static function curl($url, $headers = [])
-	{
-		$ch = curl_init();
-
-		curl_setopt($ch, CURLOPT_URL, $url);
-
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_VERBOSE, 1);
-		curl_setopt($ch, CURLOPT_HEADER, 1);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-		$response = curl_exec($ch);
-
-		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-		$header = substr($response, 0, $header_size);
-		$body = substr($response, $header_size);
-
-		$_headers = array_filter(
-			array_map('trim', explode(PHP_EOL, $header))
-		);
-
-		$_headers = array_map(
-			function($header) {
-				return explode(': ', $header, 2);
+			foreach($adapters as $adapterClass)
+			{
+				$cacheRes = $adapterClass::onDisconnect(
+					$request, $response, $realUri, $cacheHash, $cache
+				);
 			}
-			, $_headers
-		);
+		});
 
-		foreach($_headers as $header)
-		{
-			$headers[$header[0]] = $header[1] ?? NULL;
-		}
-
-		curl_close($ch);
-
-		$headers = (object) $headers;
-
-		return (object)[
-			'header' => $headers
-			, 'body' => $body
-		];
+		return $return;
 	}
 
 	protected static function sendHeaders($headers)
@@ -173,6 +158,11 @@ class Request
 			if($headerName == 'Transfer-Encoding')
 			{
 				continue;
+			}
+
+			if(is_array($header))
+			{
+				$header = $header[0];
 			}
 
 			header(sprintf(

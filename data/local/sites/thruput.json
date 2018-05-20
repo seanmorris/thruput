@@ -9,5 +9,5 @@
 		}
 	}
 	, "public": "/home/sean/thruput/public"
-	, "logLevel": "info"
+	, "logLevel": "query"
 }

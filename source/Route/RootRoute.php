@@ -7,11 +7,14 @@ class RootRoute implements \SeanMorris\Ids\Routable
 		session_write_close();
 
 		return \SeanMorris\ThruPut\Request::handle(
-			'http://127.0.0.1:3333/'
+			'http://isotope-frontend:3333/'
+			//, 'SeanMorris\ThruPut\Client\Tor'
+			, 'SeanMorris\ThruPut\Client\Standard'
 			, [
 				'SeanMorris\ThruPut\Adapter\Standard'
-				// , 'SeanMorris\ThruPut\Adapter\Xpath'
 				, 'SeanMorris\ThruPut\Adapter\Log'
+				// , 'SeanMorris\ThruPut\Adapter\Xpath'
+				// , 'SeanMorris\ThruPut\Adapter\Plain'
 			]
 		);
 	}

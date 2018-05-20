@@ -9,16 +9,16 @@ class Log extends \SeanMorris\ThruPut\Adapter
 		\SeanMorris\Ids\Log::debug($request);
 	}
 
-	public static function onCache(&$cacheHash, $request, $response)
+	public static function onCache(&$cacheHash, $request, $uri, $response)
 	{
 		\SeanMorris\Ids\Log::info('Caching', $cacheHash);
 		\SeanMorris\Ids\Log::debug($request, $response);
 	}
 
-	public static function onResponse($request, $response, $cached = FALSE)
+	public static function onResponse($request, $response, $uri, $cached = FALSE)
 	{
 		\SeanMorris\Ids\Log::info(
-			$cached ? 'Cached Response' : 'Response'
+			$cached ? 'Cached Response' : 'Fresh Response'
 			, $cached
 		);
 

@@ -9,7 +9,7 @@ class Cache
 		$this->offset = $offset;
 	}
 
-	public static function store($hash, $response, $time = 60)
+	public static function store($hash, $response, $time = 600)
 	{
 		$_response           = clone $response;
 		$_response->response = clone $_response->response;
@@ -26,18 +26,8 @@ class Cache
 			static::cachePath($hash)
 			, json_encode($_response, JSON_PRETTY_PRINT)
 				. PHP_EOL
-		);
-
-		file_put_contents(
-			static::cachePath($hash)
-			, '==' . PHP_EOL
-			, FILE_APPEND
-		);
-
-		file_put_contents(
-			static::cachePath($hash)
-			, $body
-			, FILE_APPEND
+				. '==' . PHP_EOL
+				. $body
 		);
 	}
 

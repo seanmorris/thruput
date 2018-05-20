@@ -2,6 +2,8 @@ AddType application/x-httpd-php55 .php
 
 RewriteEngine on
 
+RedirectMatch 403 favicon.ico
+
 RewriteRule ^index/(.+)$ /$1 [R=301,L]
 RewriteRule ^(.+)/index$ /$1 [R=301,L]
 RewriteRule ^(.+)/$      /$1 [R=301,L]

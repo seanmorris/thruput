@@ -12,23 +12,72 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		}
 	}
 
-	public static function onResponse($request, $response, $cached = FALSE)
+	public static function onResponse($request, $response, $uri, $cached = FALSE)
 	{
+		if(is_array($response->header))
+		{
+			$response->header = (object) $response->header;
+		}
+		else if(!$response)
+		{
+			$response->header = (object) [];
+		}
+
 		if(static::$preventCookies)
 		{
 			unset($response->header->{'Set-Cookie'});
 		}
 
-		if($response->header)
-		{
-			$response->header->{'X-THRUPUT-CACHE-HIT'} = $cached
-				? 'TRUE'
-				: 'FALSE'
-			;
+		$response->header->{'X-THRUPUT-CACHE-HIT'} = $cached
+			? 'TRUE'
+			: 'FALSE'
+		;
 
-			$response->header->{'X-THRUPUT-CACHE-HASH'} = sha1(
-				json_encode($request)
-			);
+		$response->header->{'X-THRUPUT-CACHE-HASH'} = sha1(
+			json_encode($request)
+		);
+	}
+
+	public static function onCache(&$cacheHash, $request, $response, $uri)
+	{
+		if(property_exists($response->header, 'HTTP/1.1 400 Bad Request'))
+		{
+			return FALSE;
 		}
+	}
+
+	public static function onDisconnect($request, $response, $uri, $cacheHash, $cached = FALSE)
+	{
+		$contentType = NULL;
+
+		if(isset($response->header, $response->header->{'Content-Type'}))
+		{
+			$contentType = strtok($response->header->{'Content-Type'}, ';');
+		}
+
+		if($cached || $contentType !== 'text/html')
+		{
+			return;
+		}
+
+		$prendererCommand = sprintf(
+			'node /home/sean/prenderer/index.js %s'
+			, escapeshellarg($uri)
+		);
+
+		\SeanMorris\Ids\Log::debug('prend start');
+		\SeanMorris\Ids\Log::debug($prendererCommand);
+		$prerendered = `$prendererCommand`;
+		\SeanMorris\Ids\Log::debug($prerendered);
+		\SeanMorris\Ids\Log::debug('prend done');
+
+		$_response = clone $response;
+
+		$_response->body = $prerendered;
+
+		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
+			'response'  => $_response
+			, 'request' => $request
+		]);
 	}
 }
