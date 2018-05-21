@@ -19,3 +19,13 @@ class RootRoute implements \SeanMorris\Ids\Routable
 		);
 	}
 }
+
+// [
+// 	'SeanMorris\ThruPut\Adapter\Standard'
+// 	'SeanMorris\ThruPut\Adapter\Cache' => [
+// 		'expiry' => 3600
+// 	]
+// 	, 'SeanMorris\ThruPut\Adapter\Log'
+// 	, 'SeanMorris\ThruPut\Adapter\Xpath'
+// 	, 'SeanMorris\ThruPut\Adapter\Plain'
+// ]

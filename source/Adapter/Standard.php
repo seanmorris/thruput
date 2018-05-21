@@ -55,13 +55,15 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			$contentType = strtok($response->header->{'Content-Type'}, ';');
 		}
 
+		\SeanMorris\Ids\Log::debug($cached, $contentType);
+
 		if($cached || $contentType !== 'text/html')
 		{
 			return;
 		}
 
 		$prendererCommand = sprintf(
-			'node /home/sean/prenderer/index.js %s'
+			'prenderer %s'
 			, escapeshellarg($uri)
 		);
 
