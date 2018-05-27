@@ -21,6 +21,7 @@ if(!$entrypoint = Settings::read('entrypoint'))
 {
 	print('No entrypoint specified. Please check local settings.');
 	Log::error('No entrypoint specified. Please check local settings.');
+	var_dump($_SERVER);
 	die;
 }
 

@@ -63,7 +63,7 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		}
 
 		$prendererCommand = sprintf(
-			'prenderer %s'
+			'prenderer %s --timeout=5000'
 			, escapeshellarg($uri)
 		);
 

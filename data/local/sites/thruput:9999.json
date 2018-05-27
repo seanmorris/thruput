@@ -1,5 +1,5 @@
 {
-	"origin": "http://isotope-frontend:3333/"
+	"origin": "http://isotope/"
 	, "entrypoint" : "SeanMorris\\ThruPut\\Route\\RootRoute"
 	, "devmode" : true
 	, "databases" : {
@@ -10,5 +10,5 @@
 		}
 	}
 	, "public": "/home/sean/thruput/public"
-	, "logLevel": "query"
+	, "logLevel": "off"
 }
