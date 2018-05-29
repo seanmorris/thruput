@@ -1,5 +1,5 @@
 {
-	"origin": "http://isotope-frontend:3333/"
+	"origin": "http://127.0.0.1:3333/"
 	, "entrypoint" : "SeanMorris\\ThruPut\\Route\\RootRoute"
 	, "devmode" : true
 	, "databases" : {

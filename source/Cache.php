@@ -66,6 +66,17 @@ class Cache
 		}
 	}
 
+	public function delete($hash)
+	{
+		if(!file_exists($filePath = static::cachePath($hash)))
+		{
+			return;
+		}
+
+		$cacheFile = new \SeanMorris\Ids\Disk\File($filePath);
+		$cacheFile->delete();
+	}
+
 	public static function clear($router)
 	{
 		$cacheDir = new \SeanMorris\Ids\Disk\Directory(
