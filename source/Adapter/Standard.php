@@ -59,13 +59,16 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 		if($cached || $contentType !== 'text/html')
 		{
+			\SeanMorris\Ids\Log::debug('Aww...');
 			return;
 		}
 
 		$prendererCommand = sprintf(
-			'prenderer %s --timeout=500'
+			'prenderer %s --timeout=1500'
 			, escapeshellarg($uri)
 		);
+
+		\SeanMorris\Ids\Log::debug($prendererCommand);
 
 		\SeanMorris\Ids\Log::debug('prend start');
 		\SeanMorris\Ids\Log::debug($prendererCommand);
@@ -74,6 +77,8 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		\SeanMorris\Ids\Log::debug('prend done');
 
 		$response->body = $prerendered;
+
+		\SeanMorris\Ids\Log::debug($response->body);
 
 		$dom = new \DomDocument;
 		$dom->loadHTML($response->body);

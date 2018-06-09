@@ -11,8 +11,8 @@ class RootRoute implements \SeanMorris\Ids\Routable
 			//, 'SeanMorris\ThruPut\Client\Tor'
 			, 'SeanMorris\ThruPut\Client\Standard'
 			, [
-				'SeanMorris\ThruPut\Adapter\Xpath'
-				, 'SeanMorris\ThruPut\Adapter\Standard'
+				'SeanMorris\ThruPut\Adapter\Standard'
+				// , 'SeanMorris\ThruPut\Adapter\Xpath'
 				// , 'SeanMorris\ThruPut\Adapter\MetaHttpHeader'
 				// , 'SeanMorris\ThruPut\Adapter\Log'
 				// , 'SeanMorris\ThruPut\Adapter\Plain'
