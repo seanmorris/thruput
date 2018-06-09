@@ -55,15 +55,20 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			$contentType = strtok($response->header->{'Content-Type'}, ';');
 		}
 
+		\SeanMorris\Ids\Log::debug($cached, $contentType);
+
 		if($cached || $contentType !== 'text/html')
 		{
+			\SeanMorris\Ids\Log::debug('Aww...');
 			return;
 		}
 
 		$prendererCommand = sprintf(
-			'node /home/sean/prenderer/index.js %s'
+			'prenderer %s --timeout=1500'
 			, escapeshellarg($uri)
 		);
+
+		\SeanMorris\Ids\Log::debug($prendererCommand);
 
 		\SeanMorris\Ids\Log::debug('prend start');
 		\SeanMorris\Ids\Log::debug($prendererCommand);
@@ -71,12 +76,59 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		\SeanMorris\Ids\Log::debug($prerendered);
 		\SeanMorris\Ids\Log::debug('prend done');
 
-		$_response = clone $response;
+		$response->body = $prerendered;
 
-		$_response->body = $prerendered;
+		\SeanMorris\Ids\Log::debug($response->body);
+
+		$dom = new \DomDocument;
+		$dom->loadHTML($response->body);
+		$xpath = new \DomXPath($dom);
+
+		$nodes = $xpath->query('//meta[@name="x-thruput-http-code"]');
+
+		$responseCode = 200;
+
+		foreach ($nodes as $i => $node)
+		{
+			$responseCode = $node->getAttribute('content');
+		}
+
+		$replaceHeader = FALSE;
+
+		foreach($response->header as $header => $value)
+		{
+			if($value !== NULL)
+			{
+				continue;
+			}
+
+			if(preg_match('/^HTTP\/\d+\.\d+\s+(\d+)/', $header, $groups))
+			{
+				$replaceHeader        = $header;
+				$originalResponseCode = $groups[1];
+				break;
+			}
+		}
+
+		// if($originalResponseCode !== 200 || $responseCode !== 200)
+		// {
+		// 	\SeanMorris\ThruPut\Cache::delete($cacheHash);
+		// 	return;
+		// }
+
+		if($replaceHeader)
+		{
+			unset($response->header->{$replaceHeader});
+		}
+
+		$response->header = [
+			sprintf('HTTP/1.1 %d', $responseCode) => NULL
+		] + (array) $response->header;
+
+		\SeanMorris\Ids\Log::debug($replaceHeader, $response->header);
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
-			'response'  => $_response
+			'response'  => $response
 			, 'request' => $request
 		]);
 	}
