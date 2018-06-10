@@ -16,11 +16,5 @@
             "SeanMorris\\ThruPut\\Test\\": "test/",
             "SeanMorris\\ThruPut\\":       "source/"
         }
-    },
-    "repositories": [
-        {   
-            "type": "vcs",
-            "url":  "git@bitbucket.org:SeanMorris227/ids.git"
-        }
-    ]
+    }
 }
