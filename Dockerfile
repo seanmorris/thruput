@@ -23,10 +23,9 @@ RUN apt-get update \
 	&& chmod -R 777 /app/temporary \
 	&& cd /app \
 	&& composer install --prefer-source --no-interaction \
-	&& service ssh start
 
 RUN ln -s /app/vendor/seanmorris/ids/source/Idilic/idilic /usr/local/bin/idilic
 
 WORKDIR /app
 
-CMD /usr/sbin/sshd -D && apache2-foreground
+CMD apache2-foreground
