@@ -19,7 +19,7 @@ COPY . /app
 
 RUN apt-get update \
 	&& chmod -R 775 /app \
-	&& chmod -R 777 /app/temporary
+	&& chmod -R 777 /app/temporary \
 	&& composer install
 
 RUN ln -s /app/vendor/seanmorris/ids/source/Idilic/idilic /usr/local/bin/idilic
