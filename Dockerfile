@@ -25,7 +25,8 @@ RUN apt-get update \
 	&& chmod -R 775 /app \
 	&& chmod -R 777 /app/temporary \
 	&& cd /app \
-	&& composer install --prefer-source --no-interaction
+	&& composer install --prefer-source --no-interaction \
+	&& service ssh start
 
 RUN ln -s /app/vendor/seanmorris/ids/source/Idilic/idilic /usr/local/bin/idilic
 
