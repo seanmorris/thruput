@@ -1,6 +1,7 @@
 FROM php:7.2-apache
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
+COPY . /app
 COPY ./thruput.conf /etc/apache2/sites-available/thruput.conf
 
 RUN apt-get update \
@@ -18,8 +19,6 @@ RUN apt-get update \
 RUN apt-get install -y --no-install-recommends git zip
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
-
-COPY . /app
 
 RUN apt-get update \
 	&& chmod -R 775 /app \
