@@ -2,28 +2,48 @@
 namespace SeanMorris\ThruPut;
 class Request
 {
-	public static function skeleton()
+	public static function skeleton($uri = NULL, $origin = NULL)
 	{
-		$parsedUrl   = parse_url($_SERVER['REQUEST_URI'] ?? NULL);
-		$queryString = isset($parsedUrl['query']) ? $parsedUrl['query'] : NULL;
+		$parsedUrl    = parse_url($uri ?? $_SERVER['REQUEST_URI'] ?? NULL);
+		$parsedOrigin = parse_url($origin ?? $uri);
+		$queryString  = isset($parsedUrl['query']) ? $parsedUrl['query'] : NULL;
 
 		parse_str($queryString, $query);
 
+		$port = $parsedUrl['port']
+			?? $_SERVER['port']
+			?? NULL;
+
+		if($origin)
+		{
+			$port = $parsedOrigin['port'] ?? NULL;
+		}
+
 		return [
-			'method'        => $_SERVER['REQUEST_METHOD'] ?? NULL
-			, 'scheme'      => $_SERVER['REQUEST_SCHEME'] ?? NULL
-			, 'host'        => $_SERVER['SERVER_NAME']    ?? NULL
-			, 'path'        => $parsedUrl['path']         ?? NULL
-			, 'port'        => $_SERVER['SERVER_PORT']    ?? NULL
-			, 'query'       => $query                     ?? NULL
-			, 'queryString' => $queryString               ?? NULL
+			'method'        => 'GET'
+			, 'scheme'      => $parsedOrigin['scheme'] ?? 'http'
+			, 'host'        => $parsedOrigin['host']
+			, 'path'        => $parsedUrl['path'] ?? NULL
+			, 'port'        => $port
+			, 'query'       => $query ?? NULL
+			, 'queryString' => $queryString ?? NULL
 		];
+	}
+
+	public static function uri($origin, $skeleton)
+	{
+		return sprintf(
+			'%s/%s?%s'
+			, $origin
+			, substr($skeleton['path'], 1)
+			, $skeleton['queryString']
+		);
 	}
 
 	public static function handle($origin, $client, $adapters)
 	{
-		$request     = static::skeleton();
-		$cacheHash   = sha1(json_encode($request));
+		$request     = static::skeleton(NULL, $origin);
+		$cacheHash   = \SeanMorris\ThruPut\Cache::hash($request);
 		$cache       = \SeanMorris\ThruPut\Cache::load($cacheHash);
 		$adaptersRev = array_reverse($adapters);
 
@@ -37,12 +57,7 @@ class Request
 			}
 		}
 
-		$realUri = sprintf(
-			'%s%s?%s'
-			, $origin
-			, substr($request['path'], 1)
-			, $request['queryString']
-		);
+		$realUri = static::uri($origin, $request);
 
 		foreach($adaptersRev as $adapterClass)
 		{
@@ -56,7 +71,7 @@ class Request
 
 		if($cache)
 		{
-			\SeanMorris\Ids\Log::debug('CACHE HIT');
+			\SeanMorris\Ids\Log::debug('CACHE HIT!', $cacheHash);
 
 			\SeanMorris\Ids\Log::debug($cache);
 

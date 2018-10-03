@@ -7,12 +7,12 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 	protected static function processors()
 	{
 		return [
-			'//body' => function($node, $index, $response) {
-				$node->nodeValue = sprintf(
-					'I was cached at %s!'
-					, date('h:i:s Y-m-d')
-				);
-			}
+			// '//body' => function($node, $index, $response) {
+			// 	$node->nodeValue = sprintf(
+			// 		'I was cached at %s!'
+			// 		, date('h:i:s Y-m-d')
+			// 	);
+			// }
 			// , '//a' => function($node, $index, $response) {
 			// 	static::$prefix = trim($node->nodeValue) . PHP_EOL . static::$prefix;
 

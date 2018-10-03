@@ -9,7 +9,17 @@ class Cache
 		$this->offset = $offset;
 	}
 
-	public static function store($hash, $response, $time = 600)
+	public static function hash($request)
+	{
+		$request = json_decode(json_encode($request));
+
+		$request->queryString = NULL;
+		$request->query       = [];
+
+		return sha1(json_encode($request));
+	}
+
+	public static function store($hash, $response, $time = 86400)
 	{
 		$_response           = clone $response;
 		$_response->response = clone $_response->response;
@@ -20,7 +30,13 @@ class Cache
 
 		$_response->meta = (object)[];
 
-		$_response->meta->expiry = time() + $time; 
+		$_response->meta->expiry = false;
+
+		if($time < 0)
+		{
+			$_response->meta->expiry = time() + $time; 
+		}
+
 
 		file_put_contents(
 			static::cachePath($hash)

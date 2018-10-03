@@ -14,11 +14,13 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 	public static function onResponse($request, $response, $uri, $cached = FALSE)
 	{
-		if(is_array($response->header))
-		{
+		if($response
+			&& isset($response->header)
+			&& is_array($response->header)
+		){
 			$response->header = (object) $response->header;
 		}
-		else if(!$response)
+		else if(!$response || !isset($response->header))
 		{
 			$response->header = (object) [];
 		}
@@ -40,9 +42,19 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 	public static function onCache(&$cacheHash, $request, $response, $uri)
 	{
+		if(isset($response->header, $response->header->{'Content-Type'}))
+		{
+			$contentType = strtok($response->header->{'Content-Type'}, ';');
+		}
+
+		if($contentType === 'text/html')
+		{
+			// return FALSE;
+		}
+
+
 		if(property_exists($response->header, 'HTTP/1.1 400 Bad Request'))
 		{
-			return FALSE;
 		}
 	}
 
@@ -63,22 +75,17 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			return;
 		}
 
-		$prendererCommand = sprintf(
-			'prenderer %s --timeout=1500'
-			, escapeshellarg($uri)
+		$renderer = new \SeanMorris\Ids\ChildProcess(
+			'/home/sean/prenderer/stream.js'
 		);
 
-		\SeanMorris\Ids\Log::debug($prendererCommand);
+		$renderer->write($uri . PHP_EOL);
 
-		\SeanMorris\Ids\Log::debug('prend start');
-		\SeanMorris\Ids\Log::debug($prendererCommand);
-		$prerendered = `$prendererCommand`;
-		\SeanMorris\Ids\Log::debug($prerendered);
-		\SeanMorris\Ids\Log::debug('prend done');
+		$prerendered = json_decode($renderer->read());
 
 		$response->body = $prerendered;
 
-		\SeanMorris\Ids\Log::debug($response->body);
+		\SeanMorris\Ids\Log::debug($prerendered);
 
 		$dom = new \DomDocument;
 		$dom->loadHTML($response->body);

@@ -1,5 +1,5 @@
 {
-	"origin": "http://127.0.0.1:3333/"
+	"origin": "http://localhost:3333"
 	, "entrypoint" : "SeanMorris\\ThruPut\\Route\\RootRoute"
 	, "devmode" : true
 	, "databases" : {
@@ -7,6 +7,14 @@
 			"connection" : "mysql:dbname=thruput;host=localhost;"
 			, "username" : "sean"
 			, "password" : ""
+		}
+	}
+	, "rabbitMq": {
+		"default": {
+			"server": "localhost"
+			, "port": 5672
+			, "user": "guest"
+			, "pass": "guest"
 		}
 	}
 	, "public": "/home/sean/thruput/public"
