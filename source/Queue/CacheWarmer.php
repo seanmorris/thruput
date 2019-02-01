@@ -1,5 +1,5 @@
 <?php
-namespace SeanMorris\Thruput\Queue;
+namespace SeanMorris\ThruPut\Queue;
 class CacheWarmer extends \SeanMorris\Ids\Queue
 {
 	const CHANNEL_NO_ACK = FALSE;
@@ -43,7 +43,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 	public static function init()
 	{
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
-			'/home/sean/prenderer/stream.js'
+			'prenderer --streaming'
 		);
 	}
 
