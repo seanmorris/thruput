@@ -13,8 +13,8 @@ class Cache
 	{
 		$request = json_decode(json_encode($request));
 
-		$request->queryString = NULL;
-		$request->query       = [];
+		// $request->queryString = NULL;
+		// $request->query       = [];
 
 		return sha1(json_encode($request));
 	}
