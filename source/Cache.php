@@ -69,7 +69,7 @@ class Cache
 				$metaString .= $line;
 			}
 
-			if($meta->meta->expiry < time())
+			if($meta->meta && $meta->meta->expiry < time())
 			{
 				return FALSE;
 			}
