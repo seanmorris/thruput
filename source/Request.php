@@ -69,11 +69,22 @@ class Request
 			}
 		}
 
+		$return = '';
+
+		$response = $client::request($realUri);
+
+		$contentType = NULL;
+
+		if(isset($response->header, $response->header->{'Content-Type'}))
+		{
+			$contentType = strtok($response->header->{'Content-Type'}, ';');
+		}
+
 		if($cache)
 		{
 			\SeanMorris\Ids\Log::debug('CACHE HIT!', $cacheHash);
 
-			\SeanMorris\Ids\Log::debug($cache);
+			\SeanMorris\Ids\Log::debug((int)!!$cache);
 
 			foreach($adapters as $adapterClass)
 			{
@@ -95,17 +106,15 @@ class Request
 
 			$response = $cache->meta->response;
 
-			$return = '';
-
 			$cache->readOut(function($chunk) use(&$return){
 				$return .= $chunk;
 			});
+
+			return $return;
 		}
 		else
 		{
 			\SeanMorris\Ids\Log::debug('CACHE MISS', $headers);
-
-			$response = $client::request($realUri);
 
 			$cacheRes = NULL;
 
@@ -124,7 +133,7 @@ class Request
 				}
 			}
 
-			if($cacheRes !== FALSE)
+			if($cacheRes !== FALSE && $contentType === 'text/html')
 			{
 				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 					'response'  => $response

@@ -13,8 +13,8 @@ class Cache
 	{
 		$request = json_decode(json_encode($request));
 
-		$request->queryString = NULL;
-		$request->query       = [];
+		// $request->queryString = NULL;
+		// $request->query       = [];
 
 		return sha1(json_encode($request));
 	}
@@ -32,11 +32,10 @@ class Cache
 
 		$_response->meta->expiry = false;
 
-		if($time < 0)
+		if($time >= 0)
 		{
 			$_response->meta->expiry = time() + $time; 
 		}
-
 
 		file_put_contents(
 			static::cachePath($hash)
@@ -49,13 +48,13 @@ class Cache
 
 	public static function load($hash)
 	{
-		if(file_exists(static::cachePath($hash)))
+		$cacheFile = static::cachePath($hash);
+
+		if(file_exists($cacheFile))
 		{
-			$cacheFile   = static::cachePath($hash);
 			$cacheHandle = fopen($cacheFile, 'r');
 			$metaString  = '';
 			$meta        = (object)[];
-
 
 			while($line = fgets($cacheHandle))
 			{
@@ -69,10 +68,27 @@ class Cache
 				$metaString .= $line;
 			}
 
-			if($meta->meta && $meta->meta->expiry < time())
-			{
+			if($meta->meta
+				&& $meta->meta->expiry !== FALSE
+				&& $meta->meta->expiry > 0
+				&& $meta->meta->expiry < time()
+			){
+				\SeanMorris\Ids\Log::debug(
+					'FAIL!'
+					, $meta->meta->expiry
+					, time()
+					, $meta->meta->expiry < time()
+				);
+
 				return FALSE;
 			}
+
+			\SeanMorris\Ids\Log::debug(
+				'PASS!!!!'
+				, $meta->meta->expiry
+				, time()
+				, $meta->meta->expiry < time()
+			);
 
 			return new static(
 				$meta
