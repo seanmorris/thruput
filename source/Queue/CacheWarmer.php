@@ -69,7 +69,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		fwrite(STDERR, sprintf(
 			'Prerendering %s...' . PHP_EOL
 			, $url
-		);
+		));
 
 		$prerendered = static::$renderer->read();
 
