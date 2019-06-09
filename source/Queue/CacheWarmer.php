@@ -44,6 +44,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 	{
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
 			'prenderer --streaming'
+			, FALSE, FALSE, TRUE
 		);
 	}
 
@@ -61,10 +62,10 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		static::$renderer->write($url . PHP_EOL);
 
-		while($signaling = static::$renderer->readError())
-		{
-			fwrite(STDERR, $signaling . PHP_EOL);
-		}
+		// while($signaling = static::$renderer->readError())
+		// {
+		// 	fwrite(STDERR, $signaling . PHP_EOL);
+		// }
 
 		fwrite(STDERR, sprintf(
 			'Prerendering %s...' . PHP_EOL
@@ -73,12 +74,12 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		$prerendered = static::$renderer->read();
 
-		while($signaling = static::$renderer->readError())
-		{
-			fwrite(STDERR, $signaling . PHP_EOL);
-		}
-
 		fwrite(STDERR, $prerendered . PHP_EOL);
+
+		// while($signaling = static::$renderer->readError())
+		// {
+		// 	fwrite(STDERR, $signaling . PHP_EOL);
+		// }
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [
