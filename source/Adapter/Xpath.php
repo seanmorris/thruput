@@ -31,13 +31,16 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 
 	public static function onCache(&$cacheHash, $request, $response, $uri)
 	{
-		if(isset($response->body, $response->header->{'Content-Type'})
-			&& $response->header->{'Content-Type'} == 'text/html; charset=UTF-8'
+		if(!$response->header
+			|| (isset($response->body, $response->header->{'Content-Type'})
+				&& $response->header->{'Content-Type'} == 'text/html; charset=UTF-8'
+			)
 		){
 			$processors = static::processors();
 
 			$dom = new \DomDocument;
 			$dom->loadHTML($response->body);
+			$dom->normalizeDocument();
 			$xpath = new \DomXPath($dom);
 
 			foreach($processors as $xQuery => $processor)

@@ -118,26 +118,27 @@ class Request
 
 			$cacheRes = NULL;
 
-			foreach($adapters as $adapterClass)
-			{
-				$cacheRes = $adapterClass::onCache(
-					$cacheHash
-					, $request
-					, $response
-					, $realUri
-				);
+			// foreach($adapters as $adapterClass)
+			// {
+			// 	$cacheRes = $adapterClass::onCache(
+			// 		$cacheHash
+			// 		, $request
+			// 		, $response
+			// 		, $realUri
+			// 	);
 
-				if($cacheRes === FALSE)
-				{
-					break;
-				}
-			}
+			// 	if($cacheRes === FALSE)
+			// 	{
+			// 		break;
+			// 	}
+			// }
 
 			if($cacheRes !== FALSE && $contentType === 'text/html')
 			{
 				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 					'response'  => $response
 					, 'request' => $request
+					, 'realUri' => $realUri
 				]);
 			}
 

@@ -21,6 +21,30 @@ class Cache
 
 	public static function store($hash, $response, $time = 86400)
 	{
+		$adapters = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
+
+		\SeanMorris\Ids\Log::error($response->response);
+
+		foreach($adapters as $adapterClass)
+		{
+
+			\SeanMorris\Ids\Log::error($adapterClass);
+
+			$cacheRes = $adapterClass::onCache(
+				$cacheHash
+				, $response->request
+				, $response->response
+				, $response->realUri
+			);
+
+			if($cacheRes === FALSE)
+			{
+				break;
+			}
+		}
+
+		\SeanMorris\Ids\Log::error($response->response);
+
 		$_response           = clone $response;
 		$_response->response = clone $_response->response;
 

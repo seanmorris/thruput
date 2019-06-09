@@ -10,13 +10,14 @@ class RootRoute implements \SeanMorris\Ids\Routable
 			\SeanMorris\Ids\Settings::read('origin')
 			//, 'SeanMorris\ThruPut\Client\Tor'
 			, 'SeanMorris\ThruPut\Client\Standard'
-			, [
-				'SeanMorris\ThruPut\Adapter\Standard'
-				, 'SeanMorris\ThruPut\Adapter\Xpath'
-				// , 'SeanMorris\ThruPut\Adapter\MetaHttpHeader'
-				// , 'SeanMorris\ThruPut\Adapter\Log'
-				// , 'SeanMorris\ThruPut\Adapter\Plain'
-			]
+			, \SeanMorris\Ids\Settings::read('thruput', 'adapters')
+			// , [
+			// 	'SeanMorris\ThruPut\Adapter\Standard'
+			// 	, 'SeanMorris\ThruPut\Adapter\Xpath'
+			// 	// , 'SeanMorris\ThruPut\Adapter\MetaHttpHeader'
+			// 	// , 'SeanMorris\ThruPut\Adapter\Log'
+			// 	// , 'SeanMorris\ThruPut\Adapter\Plain'
+			// ]
 		);
 	}
 }

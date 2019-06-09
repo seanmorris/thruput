@@ -83,10 +83,11 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [
-				'headers' => []
-				, 'body'  => json_decode($prerendered)
+				'header' => []
+				, 'body' => json_decode($prerendered)
 			]
 			, 'request' => $request
+			, 'realUri' => $url
 		], -1);
 
 		return TRUE;
