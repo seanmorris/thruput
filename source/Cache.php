@@ -23,23 +23,26 @@ class Cache
 	{
 		$adapters = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
 
-		\SeanMorris\Ids\Log::error($response->response);
+		// \SeanMorris\Ids\Log::error($response->response);
 
-		foreach($adapters as $adapterClass)
+		if($adapters)
 		{
-
-			\SeanMorris\Ids\Log::error($adapterClass);
-
-			$cacheRes = $adapterClass::onCache(
-				$cacheHash
-				, $response->request
-				, $response->response
-				, $response->realUri
-			);
-
-			if($cacheRes === FALSE)
+			foreach($adapters as $adapterClass)
 			{
-				break;
+
+				// \SeanMorris\Ids\Log::error($adapterClass);
+
+				$cacheRes = $adapterClass::onCache(
+					$cacheHash
+					, $response->request
+					, $response->response
+					, $response->realUri
+				);
+
+				if($cacheRes === FALSE)
+				{
+					break;
+				}
 			}
 		}
 

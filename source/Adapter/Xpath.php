@@ -31,16 +31,23 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 
 	public static function onCache(&$cacheHash, $request, $response, $uri)
 	{
-		if(!$response->header
-			|| (isset($response->body, $response->header->{'Content-Type'})
-				&& $response->header->{'Content-Type'} == 'text/html; charset=UTF-8'
-			)
+		$header = (object) $response->header;
+
+		\SeanMorris\Ids\Log::debug($header);
+
+		if(
+			$header->{'X-THRUPUT-PRERENDERED-AT'}?? FALSE
+
+			|| ($header->{'Content-Type'}?? FALSE) == 'text/html; charset=UTF-8'
 		){
 			$processors = static::processors();
 
 			$dom = new \DomDocument;
+			libxml_use_internal_errors(true);
 			$dom->loadHTML($response->body);
+			libxml_use_internal_errors(false);
 			$dom->normalizeDocument();
+
 			$xpath = new \DomXPath($dom);
 
 			foreach($processors as $xQuery => $processor)
@@ -52,7 +59,24 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 				}
 			}
 
-			$response->body = static::$prefix . PHP_EOL . $dom->saveHTML();
+			$prefix = static::$prefix ? static::$prefix . PHP_EOL : NULL;
+
+			$collapse = $prefix . $dom->saveHTML();
+
+
+			$tidy = new \Tidy();
+			$tidy->parseString($collapse, [
+				'vertical-space'  => 'auto'
+				, 'hide-comments' => TRUE
+				, 'indent'        => 0
+				, 'wrap'          => 0
+			], 'utf8');
+
+			$collapse = (string) $tidy;
+
+			\SeanMorris\Ids\Log::debug($collapse);
+
+			$response->body = $collapse;
 		}
 	}
 }

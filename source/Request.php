@@ -45,7 +45,7 @@ class Request
 		$request     = static::skeleton(NULL, $origin);
 		$cacheHash   = \SeanMorris\ThruPut\Cache::hash($request);
 		$cache       = \SeanMorris\ThruPut\Cache::load($cacheHash);
-		$adaptersRev = array_reverse($adapters);
+		$adaptersRev = array_reverse($adapters ?? []);
 
 		$headers = [];
 
@@ -86,19 +86,22 @@ class Request
 
 			\SeanMorris\Ids\Log::debug((int)!!$cache);
 
-			foreach($adapters as $adapterClass)
+			if($adapters)
 			{
-				$respRes = $adapterClass::onResponse(
-					$request
-					, $cache->meta->response
-					, $realUri
-					, $cacheHash
-					, TRUE
-				);
-
-				if($respRes === FALSE)
+				foreach($adapters as $adapterClass)
 				{
-					return FALSE;
+					$respRes = $adapterClass::onResponse(
+						$request
+						, $cache->meta->response
+						, $realUri
+						, $cacheHash
+						, TRUE
+					);
+
+					if($respRes === FALSE)
+					{
+						return FALSE;
+					}
 				}
 			}
 
@@ -118,22 +121,22 @@ class Request
 
 			$cacheRes = NULL;
 
-			// foreach($adapters as $adapterClass)
-			// {
-			// 	$cacheRes = $adapterClass::onCache(
-			// 		$cacheHash
-			// 		, $request
-			// 		, $response
-			// 		, $realUri
-			// 	);
+			foreach($adapters as $adapterClass)
+			{
+				$cacheRes = $adapterClass::onCache(
+					$cacheHash
+					, $request
+					, $response
+					, $realUri
+				);
 
-			// 	if($cacheRes === FALSE)
-			// 	{
-			// 		break;
-			// 	}
-			// }
+				if($cacheRes === FALSE)
+				{
+					break;
+				}
+			}
 
-			if($cacheRes !== FALSE && $contentType === 'text/html')
+			if($cacheRes !== FALSE && in_array($contentType, \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes') ?? ['text/html']))
 			{
 				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 					'response'  => $response
@@ -157,6 +160,8 @@ class Request
 				}
 			}
 
+			\SeanMorris\Ids\Log::debug($response);
+
 			static::sendHeaders($response->header);
 
 			$return = $response->body;
@@ -178,9 +183,16 @@ class Request
 
 	protected static function sendHeaders($headers)
 	{
+		$suppress = \SeanMorris\Ids\Settings::read('thruput', 'suppressHeaders') ?? [];
+
 		foreach($headers as $headerName => $header)
 		{
 			if($headerName == 'Transfer-Encoding')
+			{
+				continue;
+			}
+
+			if(in_array($headerName, $suppress))
 			{
 				continue;
 			}

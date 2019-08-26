@@ -4,7 +4,12 @@ class Standard extends \SeanMorris\ThruPut\Client
 {
 	public static function request($uri, $headers = [])
 	{
-		\SeanMorris\Ids\Log::debug('Requesting', $uri);
+		$post = FALSE;
+
+		if($_SERVER['REQUEST_METHOD'] == 'POST')
+		{
+			$post       = TRUE;
+		}
 
 		$ch = curl_init();
 
@@ -15,11 +20,17 @@ class Standard extends \SeanMorris\ThruPut\Client
 		curl_setopt($ch, CURLOPT_HEADER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-		$response = curl_exec($ch);
+		if($_POST)
+		{
+			curl_setopt($ch, CURLOPT_POST, count($_POST));
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $_POST);
+		}
+
+		$response    = curl_exec($ch);
 
 		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-		$header = substr($response, 0, $header_size);
-		$body = substr($response, $header_size);
+		$header      = substr($response, 0, $header_size);
+		$body        = substr($response, $header_size);
 
 		$_headers = array_filter(
 			array_map('trim', explode(PHP_EOL, $header))

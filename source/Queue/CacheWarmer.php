@@ -14,8 +14,8 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			, $origin
 		);
 
-		$response  = \SeanMorris\ThruPut\Client\Standard::request($realUri);
-		$xml       = new \XMLReader();
+		$response = \SeanMorris\ThruPut\Client\Standard::request($realUri);
+		$xml      = new \XMLReader();
 
 		$xml->xml($response->body);
 
@@ -44,7 +44,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 	{
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
 			'prenderer --streaming'
-			, FALSE, FALSE, TRUE
+			, TRUE
 		);
 	}
 
@@ -60,30 +60,38 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			$url = $origin . '/'. $request['path'];
 		}
 
-		static::$renderer->write($url . PHP_EOL);
-
-		// while($signaling = static::$renderer->readError())
-		// {
-		// 	fwrite(STDERR, $signaling . PHP_EOL);
-		// }
-
 		fwrite(STDERR, sprintf(
 			'Prerendering %s...' . PHP_EOL
 			, $url
 		));
 
-		$prerendered = static::$renderer->read();
+		\SeanMorris\Ids\Log::debug(sprintf(
+		 	'Prerendering %s...'
+		 	, $url
+		));
 
-		fwrite(STDERR, $prerendered . PHP_EOL);
+		static::$renderer->write($url . PHP_EOL);
 
-		// while($signaling = static::$renderer->readError())
-		// {
-		// 	fwrite(STDERR, $signaling . PHP_EOL);
-		// }
+		$prerendered = NULL;
+		$signaling   = NULL;
+
+		do
+		{
+			if($prerendered = static::$renderer->read())
+			{
+				\SeanMorris\Ids\Log::debug($prerendered);
+			}
+
+			while($signaling = static::$renderer->readError())
+			{
+				\SeanMorris\Ids\Log::error($signaling);
+			}
+
+		} while(!$prerendered);
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [
-				'header' => []
+				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
 				, 'body' => json_decode($prerendered)
 			]
 			, 'request' => $request

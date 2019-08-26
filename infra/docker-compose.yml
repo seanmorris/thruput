@@ -1,0 +1,17 @@
+version: '2.4'
+
+services:
+
+  proxy:
+    image: "${REPO}/is.seanmorr.thruput.proxy:${TAG}"
+    build:
+      context: ../
+      dockerfile: infra/proxy.Dockerfile
+    restart: always
+
+  queue:
+    image: "${REPO}/is.seanmorr.thruput.queue:${TAG}"
+    build:
+      context: ../
+      dockerfile: infra/queue.Dockerfile
+    restart: always

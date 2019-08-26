@@ -42,6 +42,9 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 	public static function onCache(&$cacheHash, $request, $response, $uri)
 	{
+		return;
+		$contentType = NULL;
+
 		if(isset($response->header, $response->header->{'Content-Type'}))
 		{
 			$contentType = strtok($response->header->{'Content-Type'}, ';');
@@ -68,7 +71,7 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 		\SeanMorris\Ids\Log::debug($cached, $contentType);
 
-		if($cached || $contentType !== 'text/html')
+		if($cached || !in_array($contentType, ['text/html']))
 		{
 			\SeanMorris\Ids\Log::debug('Aww...');
 			return;

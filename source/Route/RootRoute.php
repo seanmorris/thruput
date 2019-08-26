@@ -8,8 +8,7 @@ class RootRoute implements \SeanMorris\Ids\Routable
 
 		return \SeanMorris\ThruPut\Request::handle(
 			\SeanMorris\Ids\Settings::read('origin')
-			//, 'SeanMorris\ThruPut\Client\Tor'
-			, 'SeanMorris\ThruPut\Client\Standard'
+			, 'SeanMorris\ThruPut\Client\Standard' // 'SeanMorris\ThruPut\Client\Tor'
 			, \SeanMorris\Ids\Settings::read('thruput', 'adapters')
 			// , [
 			// 	'SeanMorris\ThruPut\Adapter\Standard'
