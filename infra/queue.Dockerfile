@@ -32,7 +32,9 @@ RUN ln -s /app/vendor/seanmorris/ids/source/Idilic/idilic /usr/local/bin/idilic
 RUN apt-get update \
 	&& apt install libtidy-dev  -y --no-install-recommends \
 	&& docker-php-ext-install tidy \
-	&& docker-php-ext-enable tidy
+	&& docker-php-ext-enable tidy \
+	&& pecl install redis \
+    && docker-php-ext-enable redis
 
 CMD ["idilic", "-vv", "SeanMorris/ThruPut", "warmDaemon"]
 

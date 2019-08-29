@@ -66,11 +66,13 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 
 			$tidy = new \Tidy();
 			$tidy->parseString($collapse, [
-				'vertical-space'  => 'auto'
+				'vertical-space'  => FALSE
 				, 'hide-comments' => TRUE
 				, 'indent'        => 0
-				, 'wrap'          => 0
+				, 'wrap'          => 80
 			], 'utf8');
+
+			$tidy->cleanRepair();
 
 			$collapse = (string) $tidy;
 

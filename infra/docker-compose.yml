@@ -15,3 +15,7 @@ services:
       context: ../
       dockerfile: infra/queue.Dockerfile
     restart: always
+
+  redis:
+    image: redis:5.0
+    restart: always

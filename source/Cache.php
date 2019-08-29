@@ -4,7 +4,7 @@ class Cache
 {
 	protected function __construct($meta, $handle, $offset)
 	{
-		$this->meta   = $meta;
+		$this->meta    = $meta;
 		$this->handle = $handle;
 		$this->offset = $offset;
 	}
@@ -64,22 +64,57 @@ class Cache
 			$_response->meta->expiry = time() + $time; 
 		}
 
-		file_put_contents(
-			static::cachePath($hash)
-			, json_encode($_response, JSON_PRETTY_PRINT)
-				. PHP_EOL
-				. '==' . PHP_EOL
-				. $body
+		$content = json_encode($_response, JSON_PRETTY_PRINT)
+			. PHP_EOL
+			. '==' . PHP_EOL
+			. $body;
+
+		// file_put_contents(
+		// 	static::cachePath($hash)
+		// 	, $content
+		// );
+
+		$origin        = \SeanMorris\Ids\Settings::read('origin');
+		$redisSettings = \SeanMorris\Ids\Settings::read('redis');
+
+		$redis = new \Redis();
+
+		$redis->connect($redisSettings->host, $redisSettings->port);
+
+		$key = sprintf(
+			'proxy;%s;%s'
+			, $origin
+			, $hash
 		);
+
+		$redis->set($key, $content);
 	}
 
 	public static function load($hash)
 	{
-		$cacheFile = static::cachePath($hash);
+		$origin        = \SeanMorris\Ids\Settings::read('origin');
+		$redisSettings = \SeanMorris\Ids\Settings::read('redis');
 
-		if(file_exists($cacheFile))
+		$redis = new \Redis();
+
+		$redis->connect($redisSettings->host, $redisSettings->port);
+
+		$key = sprintf(
+			'proxy;%s;%s'
+			, $origin
+			, $hash
+		);
+
+		// $cacheFile = static::cachePath($hash);
+
+		if($redis->exists($key))
 		{
-			$cacheHandle = fopen($cacheFile, 'r');
+			$cacheFile =(
+				'data:text/plain;base64,'
+					. base64_encode($redis->get($key))
+			);
+
+			$cacheHandle = fopen($cacheFile, 'rb');
 			$metaString  = '';
 			$meta        = (object)[];
 
