@@ -38,6 +38,45 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		$response->header->{'X-THRUPUT-CACHE-HASH'} = sha1(
 			json_encode($request)
 		);
+
+		$contentType = NULL;
+
+		if(isset($response->header, $response->header->{'Content-Type'}))
+		{
+			$contentType = strtok($response->header->{'Content-Type'}, ';');
+		}
+
+		\SeanMorris\Ids\Log::debug($cached, $contentType);
+
+		if($cached || !in_array($contentType, ['text/html']))
+		{
+			\SeanMorris\Ids\Log::debug('Aww...');
+			return;
+		}
+
+		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::rpc($request);
+
+		$time = time();
+
+		while(TRUE)
+		{
+			if(time() - $time > 60)
+			{
+				break;
+			}
+
+			if($message = $returner())
+			{
+				if(is_object($message)
+					&& $message->response ?? FALSE
+					&& is_object($message->response)
+					&& $message->response->body ?? FALSE
+				){
+					$response->body = $message->response->body;
+				}
+				break;
+			}
+		}
 	}
 
 	public static function onCache(&$cacheHash, $request, $response, $uri)
@@ -62,21 +101,21 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 	public static function onDisconnect($request, $response, $uri, $cacheHash, $cached = FALSE)
 	{
-		$contentType = NULL;
+		// $contentType = NULL;
 
-		if(isset($response->header, $response->header->{'Content-Type'}))
-		{
-			$contentType = strtok($response->header->{'Content-Type'}, ';');
-		}
+		// if(isset($response->header, $response->header->{'Content-Type'}))
+		// {
+		// 	$contentType = strtok($response->header->{'Content-Type'}, ';');
+		// }
 
-		\SeanMorris\Ids\Log::debug($cached, $contentType);
+		// \SeanMorris\Ids\Log::debug($cached, $contentType);
 
-		if($cached || !in_array($contentType, ['text/html']))
-		{
-			\SeanMorris\Ids\Log::debug('Aww...');
-			return;
-		}
+		// if($cached || !in_array($contentType, ['text/html']))
+		// {
+		// 	\SeanMorris\Ids\Log::debug('Aww...');
+		// 	return;
+		// }
 
-		\SeanMorris\ThruPut\Queue\CacheWarmer::send($request);
+		// \SeanMorris\ThruPut\Queue\CacheWarmer::send($request);
 	}
 }

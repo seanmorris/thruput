@@ -71,20 +71,11 @@ class Request
 
 		$return = '';
 
-		$response = $client::request($realUri);
-
-		$contentType = NULL;
-
-		if(isset($response->header, $response->header->{'Content-Type'}))
-		{
-			$contentType = strtok($response->header->{'Content-Type'}, ';');
-		}
-
 		if($cache)
 		{
 			\SeanMorris\Ids\Log::debug('CACHE HIT!', $cacheHash);
 
-			\SeanMorris\Ids\Log::debug((int)!!$cache);
+			\SeanMorris\Ids\Log::error($cache);
 
 			if($adapters)
 			{
@@ -92,7 +83,7 @@ class Request
 				{
 					$respRes = $adapterClass::onResponse(
 						$request
-						, $cache->meta->response
+						, $cache->meta('response')
 						, $realUri
 						, $cacheHash
 						, TRUE
@@ -105,9 +96,9 @@ class Request
 				}
 			}
 
-			static::sendHeaders($cache->meta->response->header);
+			static::sendHeaders($cache->meta('response')->header);
 
-			$response = $cache->meta->response;
+			$response = $cache->meta('response');
 
 			$cache->readOut(function($chunk) use(&$return){
 				$return .= $chunk;
@@ -118,6 +109,15 @@ class Request
 		else
 		{
 			\SeanMorris\Ids\Log::debug('CACHE MISS', $headers);
+
+			$response = $client::request($realUri);
+
+			$contentType = NULL;
+
+			if(isset($response->header, $response->header->{'Content-Type'}))
+			{
+				$contentType = strtok($response->header->{'Content-Type'}, ';');
+			}
 
 			$cacheRes = NULL;
 
@@ -142,7 +142,7 @@ class Request
 					'response'  => $response
 					, 'request' => $request
 					, 'realUri' => $realUri
-				]);
+				], \SeanMorris\Ids\Settings::read('cacheTime') ?? 60);
 			}
 
 			foreach($adaptersRev as $adapterClass)

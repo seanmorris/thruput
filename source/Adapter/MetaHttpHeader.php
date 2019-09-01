@@ -7,12 +7,12 @@ class MetaHttpHeader extends Xpath
 	protected static function processors()
 	{
 		return [
-			'//meta[name="x-thruput-http-code"]' => function($node, $index, $response) {
-				\SeanMorris\Ids\Log::debug($node->getAttribute('content'));
-				// $node->nodeValue = sprintf(
-				// 	'I was cached at %s!'
-				// 	, date('h:i:s Y-m-d')
-				// );
+			'//meta[@name="x-thruput-http-code"]' => function($node, $index, $response) {
+
+				$node->setAttribute('content', sprintf(
+					'I was cached at %s!'
+					, date('h:i:s Y-m-d')
+				));
 			}
 		];
 	}

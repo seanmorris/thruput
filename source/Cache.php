@@ -2,9 +2,11 @@
 namespace SeanMorris\ThruPut;
 class Cache
 {
-	protected function __construct($meta, $handle, $offset)
+	protected $meta, $handle, $offet, $hash;
+
+	protected function __construct($meta = NULL, $handle = NULL, $offset = NULL)
 	{
-		$this->meta    = $meta;
+		$this->meta   = $meta;
 		$this->handle = $handle;
 		$this->offset = $offset;
 	}
@@ -13,30 +15,23 @@ class Cache
 	{
 		$request = json_decode(json_encode($request));
 
-		// $request->queryString = NULL;
-		// $request->query       = [];
-
 		return sha1(json_encode($request));
 	}
 
-	public static function store($hash, $response, $time = 86400)
+	public static function store($hash, $content, $time = 86400)
 	{
 		$adapters = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
-
-		// \SeanMorris\Ids\Log::error($response->response);
 
 		if($adapters)
 		{
 			foreach($adapters as $adapterClass)
 			{
 
-				// \SeanMorris\Ids\Log::error($adapterClass);
-
 				$cacheRes = $adapterClass::onCache(
 					$cacheHash
-					, $response->request
-					, $response->response
-					, $response->realUri
+					, $content->request
+					, $content->response
+					, $content->realUri
 				);
 
 				if($cacheRes === FALSE)
@@ -46,33 +41,27 @@ class Cache
 			}
 		}
 
-		\SeanMorris\Ids\Log::error($response->response);
+		$_content           = clone $content;
+		$_content->hash     = $hash;
+		$_content->response = clone $_content->response;
 
-		$_response           = clone $response;
-		$_response->response = clone $_response->response;
+		$body = $_content->response->body;
 
-		$body = $_response->response->body;
+		unset($_content->response->body);
 
-		unset($_response->response->body);
+		$_content->meta = (object)[];
 
-		$_response->meta = (object)[];
-
-		$_response->meta->expiry = false;
+		$_content->meta->expiry = false;
 
 		if($time >= 0)
 		{
-			$_response->meta->expiry = time() + $time; 
+			$_content->meta->expiry = time() + $time;
 		}
 
-		$content = json_encode($_response, JSON_PRETTY_PRINT)
+		$cacheBlob = json_encode($_content, JSON_PRETTY_PRINT)
 			. PHP_EOL
 			. '==' . PHP_EOL
 			. $body;
-
-		// file_put_contents(
-		// 	static::cachePath($hash)
-		// 	, $content
-		// );
 
 		$origin        = \SeanMorris\Ids\Settings::read('origin');
 		$redisSettings = \SeanMorris\Ids\Settings::read('redis');
@@ -87,10 +76,20 @@ class Cache
 			, $hash
 		);
 
-		$redis->set($key, $content);
+		$redis->set($key, $cacheBlob);
 	}
 
 	public static function load($hash)
+	{
+		$cacheObject = new Static();
+
+		if($cacheObject->refresh($hash))
+		{
+			return $cacheObject;
+		}
+	}
+
+	public function refresh($hash)
 	{
 		$origin        = \SeanMorris\Ids\Settings::read('origin');
 		$redisSettings = \SeanMorris\Ids\Settings::read('redis');
@@ -104,8 +103,6 @@ class Cache
 			, $origin
 			, $hash
 		);
-
-		// $cacheFile = static::cachePath($hash);
 
 		if($redis->exists($key))
 		{
@@ -124,7 +121,7 @@ class Cache
 				{
 					if($meta = json_decode($metaString))
 					{
-						break;						
+						break;
 					}
 				}
 				$metaString .= $line;
@@ -152,12 +149,14 @@ class Cache
 				, $meta->meta->expiry < time()
 			);
 
-			return new static(
-				$meta
-				, $cacheHandle
-				, ftell($cacheHandle)
-			);
+			$this->meta   = $meta;
+			$this->handle = $cacheHandle;
+			$this->offset = ftell($cacheHandle);
+
+			return TRUE;
 		}
+
+		return FALSE;
 	}
 
 	public function delete($hash)
@@ -201,5 +200,10 @@ class Cache
 		{
 			$callback(fread($this->handle, 1024));
 		}
+	}
+
+	public function meta($property)
+	{
+		return $this->meta->{$property} ?? NULL;
 	}
 }

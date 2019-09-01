@@ -2,7 +2,7 @@
 namespace SeanMorris\ThruPut\Queue;
 class CacheWarmer extends \SeanMorris\Ids\Queue
 {
-	const CHANNEL_NO_ACK = FALSE;
+	const CHANNEL_NO_ACK = FALSE, ASYNC = TRUE, RPC = TRUE;
 
 	protected static $renderer;
 
@@ -61,6 +61,11 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		}
 
 		fwrite(STDERR, sprintf(
+			'Origin %s...' . PHP_EOL
+			, $origin
+		));
+
+		fwrite(STDERR, sprintf(
 			'Prerendering %s...' . PHP_EOL
 			, $url
 		));
@@ -84,20 +89,24 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 			while($signaling = static::$renderer->readError())
 			{
-				\SeanMorris\Ids\Log::error($signaling);
+				\SeanMorris\Ids\Log::debug($signaling);
 			}
 
 		} while(!$prerendered);
 
-		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
+		$cached = (object)[
 			'response'  => (object) [
 				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
 				, 'body' => json_decode($prerendered)
 			]
 			, 'request' => $request
 			, 'realUri' => $url
-		], -1);
+		];
 
-		return TRUE;
+		$expiry = \SeanMorris\Ids\Settings::read('cacheTime') ?? 60;
+
+		\SeanMorris\ThruPut\Cache::store($cacheHash, $cached, $expiry);
+
+		return $cached;
 	}
 }
