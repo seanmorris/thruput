@@ -2,7 +2,7 @@
 namespace SeanMorris\ThruPut;
 class Cache
 {
-	protected $meta, $handle, $offet, $hash;
+	protected $meta, $hash;
 
 	protected function __construct($meta = NULL, $handle = NULL, $offset = NULL)
 	{
@@ -24,6 +24,8 @@ class Cache
 
 		if($adapters)
 		{
+			$scope = (object) [];
+
 			foreach($adapters as $adapterClass)
 			{
 
@@ -32,6 +34,7 @@ class Cache
 					, $content->request
 					, $content->response
 					, $content->realUri
+					, $scope
 				);
 
 				if($cacheRes === FALSE)
@@ -53,7 +56,18 @@ class Cache
 
 		$_content->meta->expiry = false;
 
-		if($time >= 0)
+		\SeanMorris\Ids\Log::error($scope);
+
+		if(isset($scope->expiry))
+		{
+			// if($scope->expiry == 0)
+			// {
+			// 	return;
+			// }
+
+			$_content->meta->expiry = time() + $scope->expiry;
+		}
+		else if($time >= 0)
 		{
 			$_content->meta->expiry = time() + $time;
 		}
@@ -104,30 +118,42 @@ class Cache
 			, $hash
 		);
 
+		$content = $redis->get($key);
+		$body    = '';
+
 		if($redis->exists($key))
 		{
-			$cacheFile =(
-				'data:text/plain;base64,'
-					. base64_encode($redis->get($key))
-			);
+			$contentLines  = explode("\n", $content);
 
-			$cacheHandle = fopen($cacheFile, 'rb');
 			$metaString  = '';
-			$meta        = (object)[];
+			$meta        = FALSE;
 
-			while($line = fgets($cacheHandle))
+			foreach($contentLines as $line)
 			{
-				if(strlen($line) === 3 && substr($line, 0, 2) == '==')
+				if(!$meta && substr($line, 0, 2) == '==')
 				{
+
 					if($meta = json_decode($metaString))
 					{
-						break;
+						continue;
 					}
 				}
-				$metaString .= $line;
+
+				if($meta)
+				{
+					$body .= $line . PHP_EOL;
+					continue;
+				}
+				else
+				{
+					$metaString .= $line . PHP_EOL;
+					continue;
+				}
 			}
 
-			if($meta->meta
+			\SeanMorris\Ids\Log::error($meta);
+
+			if(isset($meta->meta)
 				&& $meta->meta->expiry !== FALSE
 				&& $meta->meta->expiry > 0
 				&& $meta->meta->expiry < time()
@@ -149,9 +175,9 @@ class Cache
 				, $meta->meta->expiry < time()
 			);
 
-			$this->meta   = $meta;
-			$this->handle = $cacheHandle;
-			$this->offset = ftell($cacheHandle);
+			$meta->response->body = $body;
+
+			$this->meta = $meta;
 
 			return TRUE;
 		}
@@ -194,12 +220,7 @@ class Cache
 
 	public function readOut($callback)
 	{
-		fseek($this->handle, $this->offset);
-
-		while(!feof($this->handle))
-		{
-			$callback(fread($this->handle, 1024));
-		}
+		$callback($this->meta->response->body);
 	}
 
 	public function meta($property)

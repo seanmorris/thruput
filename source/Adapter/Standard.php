@@ -12,7 +12,7 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		}
 	}
 
-	public static function onResponse($request, $response, $uri, $cached = FALSE)
+	public static function onResponse($request, $response, $uri, $scope, $cached = FALSE)
 	{
 		if($response
 			&& isset($response->header)
@@ -54,13 +54,20 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			return;
 		}
 
+		\SeanMorris\Ids\Log::error($scope);
+
+		if(isset($scope->expiry) && $scope->expiry == 0)
+		{
+			return;
+		}
+
 		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::rpc($request);
 
 		$time = time();
 
 		while(TRUE)
 		{
-			if(time() - $time > 60)
+			if(time() - $time > 15)
 			{
 				break;
 			}
@@ -79,7 +86,7 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		}
 	}
 
-	public static function onCache(&$cacheHash, $request, $response, $uri)
+	public static function onCache(&$cacheHash, $request, $response, $uri, $scope)
 	{
 		return;
 		$contentType = NULL;

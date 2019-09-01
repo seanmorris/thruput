@@ -12,7 +12,7 @@ RUN apt-get install -y --no-install-recommends git zip
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 
-COPY . /app
+COPY ./ /app
 
 RUN chmod -R 775 /app \
 	&& chmod -R 777 /app/temporary \
