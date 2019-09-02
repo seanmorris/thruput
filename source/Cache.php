@@ -82,7 +82,7 @@ class Cache
 
 		$redis = new \Redis();
 
-		$redis->connect($redisSettings->host, $redisSettings->port);
+		$redis->pconnect($redisSettings->host, $redisSettings->port);
 
 		$key = sprintf(
 			'proxy;%s;%s'
@@ -110,7 +110,7 @@ class Cache
 
 		$redis = new \Redis();
 
-		$redis->connect($redisSettings->host, $redisSettings->port);
+		$redis->pconnect($redisSettings->host, $redisSettings->port);
 
 		$key = sprintf(
 			'proxy;%s;%s'
