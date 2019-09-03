@@ -43,7 +43,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 	public static function init()
 	{
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
-			'prenderer --streaming'
+			'prenderer --streaming --timeout=10000'
 			, TRUE
 		);
 	}
