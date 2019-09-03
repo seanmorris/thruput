@@ -54,8 +54,6 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			return;
 		}
 
-		\SeanMorris\Ids\Log::error($scope);
-
 		if(isset($scope->expiry) && $scope->expiry == 0)
 		{
 			return;

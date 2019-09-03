@@ -56,8 +56,6 @@ class Cache
 
 		$_content->meta->expiry = false;
 
-		\SeanMorris\Ids\Log::error($scope);
-
 		if(isset($scope->expiry))
 		{
 			// if($scope->expiry == 0)

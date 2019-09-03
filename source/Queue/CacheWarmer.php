@@ -82,9 +82,26 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		do
 		{
-			if($prerendered = static::$renderer->read())
+			while($p = static::$renderer->read())
 			{
-				\SeanMorris\Ids\Log::debug($prerendered);
+				$prerendered .= $p;
+				usleep(1000);
+			}
+
+			if($prerendered)
+			{
+				$decoded = json_decode($prerendered);
+
+				\SeanMorris\Ids\Log::debug($decoded);
+
+				if($error = json_last_error())
+				{
+					\SeanMorris\Ids\Log::debug(
+						$error
+						, json_last_error_msg()
+						, $prerendered
+					);
+				}
 			}
 
 			while($signaling = static::$renderer->readError())
@@ -94,19 +111,24 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		} while(!$prerendered);
 
-		$cached = (object)[
-			'response'  => (object) [
-				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
-				, 'body' => json_decode($prerendered)
-			]
-			, 'request' => $request
-			, 'realUri' => $url
-		];
+		if($decoded)
+		{
+			$cached = (object)[
+				'response'  => (object) [
+					'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
+					, 'body' => $decoded
+				]
+				, 'request' => $request
+				, 'realUri' => $url
+			];
 
-		$expiry = \SeanMorris\Ids\Settings::read('cacheTime') ?? 60;
+			\SeanMorris\Ids\Log::debug($cached);
 
-		\SeanMorris\ThruPut\Cache::store($cacheHash, $cached, $expiry);
+			$expiry = \SeanMorris\Ids\Settings::read('cacheTime') ?? 60;
 
-		return $cached;
+			\SeanMorris\ThruPut\Cache::store($cacheHash, $cached, $expiry);
+
+			return $cached;
+		}
 	}
 }

@@ -81,7 +81,7 @@ class Request
 
 				foreach($adapters as $adapterClass)
 				{
-					\SeanMorris\Ids\Log::error('CACHE HIT!', $adapterClass);
+					// \SeanMorris\Ids\Log::debug('CACHE HIT!', $adapterClass);
 					
 					$respRes = $adapterClass::onResponse(
 						$request
@@ -140,7 +140,7 @@ class Request
 
 			foreach($adapters as $adapterClass)
 			{
-				\SeanMorris\Ids\Log::error('CACHE HIT!', $adapterClass, $response,$scope);
+				// \SeanMorris\Ids\Log::error('CACHE HIT!', $adapterClass, $response,$scope);
 
 				$respRes = $adapterClass::onResponse(
 					$request
