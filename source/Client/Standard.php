@@ -4,6 +4,7 @@ class Standard extends \SeanMorris\ThruPut\Client
 {
 	public static function request($uri, $headers = [])
 	{
+		$body = NULL;
 		$post = FALSE;
 
 		if($_SERVER['REQUEST_METHOD'] == 'POST')
@@ -13,10 +14,15 @@ class Standard extends \SeanMorris\ThruPut\Client
 
 		$ch = curl_init();
 
+		\SeanMorris\Ids\Log::debug(sprintf(
+			'CURLing %s...'
+			, $uri
+		));
+
 		curl_setopt($ch, CURLOPT_URL, $uri);
 
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-		curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		// curl_setopt($ch, CURLOPT_VERBOSE, 1);
 		curl_setopt($ch, CURLOPT_HEADER, 1);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 

@@ -43,13 +43,13 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 	public static function init()
 	{
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
-			'prenderer --streaming'
-			, TRUE
+			'prenderer --streaming', TRUE
 		);
 	}
 
 	public static function recieve($request)
 	{
+		\SeanMorris\Ids\Log::error($request);
 		$origin    = \SeanMorris\Ids\Settings::read('origin');
 		$cacheHash = \SeanMorris\ThruPut\Cache::hash($request);
 
@@ -65,7 +65,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			, $url
 		));
 
-		\SeanMorris\Ids\Log::debug(sprintf(
+		\SeanMorris\Ids\Log::error(sprintf(
 		 	'Prerendering %s...'
 		 	, $url
 		));
@@ -79,7 +79,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		{
 			if($prerendered = static::$renderer->read())
 			{
-				\SeanMorris\Ids\Log::debug($prerendered);
+				\SeanMorris\Ids\Log::error($prerendered);
 			}
 
 			while($signaling = static::$renderer->readError())

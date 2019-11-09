@@ -11,6 +11,8 @@ class Cache
 
 	public static function hash($request)
 	{
+		\SeanMorris\Ids\Log::info($request);
+
 		$request = json_decode(json_encode($request));
 
 		// $request->queryString = NULL;
@@ -21,6 +23,8 @@ class Cache
 
 	public static function store($hash, $response, $time = 86400)
 	{
+		\SeanMorris\Ids\Log::info($hash, $response, $time);
+
 		$adapters = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
 
 		// \SeanMorris\Ids\Log::error($response->response);
@@ -61,7 +65,7 @@ class Cache
 
 		if($time >= 0)
 		{
-			$_response->meta->expiry = time() + $time; 
+			$_response->meta->expiry = time() + $time;
 		}
 
 		$content = json_encode($_response, JSON_PRETTY_PRINT)
@@ -92,8 +96,12 @@ class Cache
 
 	public static function load($hash)
 	{
-		$origin        = \SeanMorris\Ids\Settings::read('origin');
-		$redisSettings = \SeanMorris\Ids\Settings::read('redis');
+		$origin = \SeanMorris\Ids\Settings::read('origin');
+
+		if(!$redisSettings = \SeanMorris\Ids\Settings::read('redis'))
+		{
+			throw new Exception('No redis servers specified.');
+		}
 
 		$redis = new \Redis();
 
@@ -124,7 +132,7 @@ class Cache
 				{
 					if($meta = json_decode($metaString))
 					{
-						break;						
+						break;
 					}
 				}
 				$metaString .= $line;

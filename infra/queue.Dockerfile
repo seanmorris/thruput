@@ -1,6 +1,8 @@
 FROM php:7.2-apache AS development
 MAINTAINER Sean Morris <sean@seanmorr.is>
 
+COPY ./data/global/php/docker-php-app-thruput.ini /usr/local/etc/php/conf.d/docker-php-app-thruput.ini
+
 RUN rm -rfv /var/www/html && ln -s /app/public /var/www/html \
 	&& docker-php-ext-install pdo pdo_mysql bcmath sockets \
 	&& a2enmod rewrite \
@@ -17,16 +19,6 @@ RUN rm -rfv /var/www/html && ln -s /app/public /var/www/html \
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 
-COPY . /app
-
-RUN apt-get update \
-	&& apt-get install -y --no-install-recommends git zip ssh \
-	&& chmod -R 775 /app \
-	&& chmod -R 777 /app/temporary \
-	&& cd /app \
-	&& composer install --prefer-source --no-interaction \
-	&& npm i -g prenderer
-
 RUN ln -s /app/vendor/seanmorris/ids/source/Idilic/idilic /usr/local/bin/idilic
 
 RUN apt-get update \
@@ -34,8 +26,16 @@ RUN apt-get update \
 	&& docker-php-ext-install tidy \
 	&& docker-php-ext-enable tidy \
 	&& pecl install redis \
-    && docker-php-ext-enable redis
+    && docker-php-ext-enable redis \
+	&& npm i -g prenderer
 
 CMD ["idilic", "-vv", "SeanMorris/ThruPut", "warmDaemon"]
 
 FROM development AS production
+
+COPY . /app
+
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends git zip ssh \
+	&& cd /app \
+	&& composer install --prefer-source --no-interaction

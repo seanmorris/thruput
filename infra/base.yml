@@ -1,0 +1,34 @@
+version: '2.4'
+
+services:
+
+  proxy:
+    image: "${REPO}/is.seanmorr.thruput.proxy:${TAG}-${TARGET}"
+    build:
+      context: ../
+      dockerfile: infra/proxy.Dockerfile
+      target: ${TARGET}
+    restart: always
+    ports:
+      - "80:80"
+
+  queue:
+    image: "${REPO}/is.seanmorr.thruput.queue:${TAG}-${TARGET}"
+    build:
+      context: ../
+      dockerfile: infra/queue.Dockerfile
+      target: ${TARGET}
+    restart: always
+
+  redis:
+    image: redis:5.0
+    restart: always
+
+  rabbit:
+    image: "rabbitmq:3-management"
+    restart: always
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+      RABBITMQ_DEFAULT_USER:  ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS:  ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}

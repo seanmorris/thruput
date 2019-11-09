@@ -1,0 +1,35 @@
+version: '2.4'
+
+services:
+
+  proxy:
+    extends:
+      file: base.yml
+      service: proxy
+    volumes:
+      - ../:/app
+      - /tmp:/tmp
+
+  queue:
+    extends:
+      file: base.yml
+      service: queue
+    volumes:
+      - ../:/app
+      - /tmp:/tmp
+
+  redis:
+    extends:
+      file: base.yml
+      service: redis
+    ports:
+      - "6379:6379"
+
+  rabbit:
+    extends:
+      file: base.yml
+      service: rabbit
+    # ports:
+    #   - "15672:15672"
+    # volumes:
+    #   - ../data/global/rabbitMq/enabled_plugins:/etc/rabbitmq/enabled_plugins

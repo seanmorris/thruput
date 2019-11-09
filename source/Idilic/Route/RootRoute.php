@@ -20,8 +20,6 @@ class RootRoute implements \SeanMorris\Ids\Routable
 			, $origin
 		);
 
-		var_dump($origin, $realUri);
-
 		$response  = \SeanMorris\ThruPut\Client\Standard::request($realUri);
 		$xml       = new \XMLReader();
 
@@ -50,7 +48,7 @@ class RootRoute implements \SeanMorris\Ids\Routable
 					, urlencode($xml->readString())
 				);
 
-				fwrite(STDERR, $prendererUri . PHP_EOL);
+				c(STDERR, $prendererUri . PHP_EOL);
 
 				$response = \SeanMorris\ThruPut\Client\Standard::request($prendererUri);
 

@@ -1,0 +1,26 @@
+{
+	"origin": "http://isotope.seanmorr.is/"
+	, "canonical": ";"
+	, "entrypoint" : "SeanMorris\\ThruPut\\Route\\RootRoute"
+	, "devmode" : true
+	, "public": "/home/sean/thruput/public"
+	, "logLevel": "debug"
+	, "log": "php://stderr"
+	, "redis": {
+		"host": "redis"
+		, "port": 6379
+	}
+	, "rabbitMq": {
+		"default": {
+			"server": "rabbit"
+			, "port": 5672
+			, "user": "rabbitmq"
+			, "pass": "rabbitmq"
+		}
+	}
+	, "thruput": {
+		"adapters": [
+			"SeanMorris\\ThruPut\\Adapter\\Standard"
+		]
+	}
+}

@@ -71,15 +71,6 @@ class Request
 
 		$return = '';
 
-		$response = $client::request($realUri);
-
-		$contentType = NULL;
-
-		if(isset($response->header, $response->header->{'Content-Type'}))
-		{
-			$contentType = strtok($response->header->{'Content-Type'}, ';');
-		}
-
 		if($cache)
 		{
 			\SeanMorris\Ids\Log::debug('CACHE HIT!', $cacheHash);
@@ -119,20 +110,32 @@ class Request
 		{
 			\SeanMorris\Ids\Log::debug('CACHE MISS', $headers);
 
+			$response = $client::request($realUri);
+
+			$contentType = NULL;
+
+			if(isset($response->header, $response->header->{'Content-Type'}))
+			{
+				$contentType = strtok($response->header->{'Content-Type'}, ';');
+			}
+
 			$cacheRes = NULL;
 
-			foreach($adapters as $adapterClass)
+			if($adapters)
 			{
-				$cacheRes = $adapterClass::onCache(
-					$cacheHash
-					, $request
-					, $response
-					, $realUri
-				);
-
-				if($cacheRes === FALSE)
+				foreach($adapters as $adapterClass)
 				{
-					break;
+					$cacheRes = $adapterClass::onCache(
+						$cacheHash
+						, $request
+						, $response
+						, $realUri
+					);
+
+					if($cacheRes === FALSE)
+					{
+						break;
+					}
 				}
 			}
 
@@ -170,12 +173,18 @@ class Request
 		\SeanMorris\Ids\Http\Http::onDisconnect(function()
 			use($request, $response, $cache, $cacheHash, $adapters, $realUri){
 
-			foreach($adapters as $adapterClass)
+			\SeanMorris\Ids\Log::info($adapters);
+
+			if($adapters)
 			{
-				$cacheRes = $adapterClass::onDisconnect(
-					$request, $response, $realUri, $cacheHash, $cache
-				);
+				foreach($adapters as $adapterClass)
+				{
+					$cacheRes = $adapterClass::onDisconnect(
+						$request, $response, $realUri, $cacheHash, $cache
+					);
+				}
 			}
+
 		});
 
 		return $return;
