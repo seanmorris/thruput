@@ -408,12 +408,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/seanmorris/ids.git",
-                "reference": "957861dbc6bcea00cf9ef2fbf8bafba85d79d955"
+                "reference": "879b948ab27917c5f54a369fff7b258475bd11c9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/seanmorris/ids/zipball/957861dbc6bcea00cf9ef2fbf8bafba85d79d955",
-                "reference": "957861dbc6bcea00cf9ef2fbf8bafba85d79d955",
+                "url": "https://api.github.com/repos/seanmorris/ids/zipball/879b948ab27917c5f54a369fff7b258475bd11c9",
+                "reference": "879b948ab27917c5f54a369fff7b258475bd11c9",
                 "shasum": ""
             },
             "require-dev": {
@@ -436,7 +436,7 @@
                     "email": "sean@sean-morris.com"
                 }
             ],
-            "time": "2019-10-28T00:07:55+00:00"
+            "time": "2019-11-09T23:40:42+00:00"
         }
     ],
     "packages-dev": [],

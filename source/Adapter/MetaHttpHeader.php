@@ -8,11 +8,8 @@ class MetaHttpHeader extends Xpath
 	{
 		return [
 			'//meta[name="x-thruput-http-code"]' => function($node, $index, $response) {
-				\SeanMorris\Ids\Log::debug($node->getAttribute('content'));
-				// $node->nodeValue = sprintf(
-				// 	'I was cached at %s!'
-				// 	, date('h:i:s Y-m-d')
-				// );
+				// \SeanMorris\Ids\Log::debug($node->getAttribute('content'));
+				$node->nodeValue = date('h:i:s Y-m-d');
 			}
 		];
 	}

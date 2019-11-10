@@ -16,7 +16,12 @@ services:
       service: queue
     volumes:
       - ../:/app
-      - /tmp:/tmp
+      - "/tmp/.X11-unix:/tmp/.X11-unix"
+    environment:
+      - "NOT_HEADLESS=1"
+      - "DONT_UNLOAD=1"
+      - "USE_GPU=0"
+      - "DISPLAY=unix${DISPLAY}"
 
   redis:
     extends:
@@ -29,7 +34,7 @@ services:
     extends:
       file: base.yml
       service: rabbit
-    # ports:
-    #   - "15672:15672"
-    # volumes:
-    #   - ../data/global/rabbitMq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+    ports:
+      - "15672:15672"
+    volumes:
+      - ../data/global/rabbitMq/enabled_plugins:/etc/rabbitmq/enabled_plugins

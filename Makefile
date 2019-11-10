@@ -20,6 +20,13 @@ dependencies:
 		composer install --ignore-platform-reqs \
 			--no-interaction \
 			--prefer-source
+update-dependencies:
+	@ cd infra/ \
+	&& docker run --rm \
+		-v `pwd`/../:/app \
+		composer update --ignore-platform-reqs \
+			--no-interaction \
+			--prefer-source
 # 	&& docker build ../vendor/seanmorris/subspace/infra/ \
 # 		-f ../vendor/seanmorris/subspace/infra/socket.Dockerfile \
 # 		-t basic-socket:latest

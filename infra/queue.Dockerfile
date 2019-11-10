@@ -22,12 +22,14 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ 
 RUN ln -s /app/vendor/seanmorris/ids/source/Idilic/idilic /usr/local/bin/idilic
 
 RUN apt-get update \
-	&& apt install libtidy-dev  -y --no-install-recommends \
+	&& apt install libyaml-dev libtidy-dev  -y --no-install-recommends \
 	&& docker-php-ext-install tidy \
 	&& docker-php-ext-enable tidy \
 	&& pecl install redis \
     && docker-php-ext-enable redis \
-	&& npm i -g prenderer
+	&& npm i -g prenderer@1.1.2 \
+	&& pecl install yaml \
+    && docker-php-ext-enable yaml
 
 CMD ["idilic", "-vv", "SeanMorris/ThruPut", "warmDaemon"]
 

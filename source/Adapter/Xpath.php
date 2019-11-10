@@ -26,7 +26,7 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 	}
 
 	public static function onRequest($request, &$uri, &$headers)
-	{	
+	{
 	}
 
 	public static function onCache(&$cacheHash, $request, $response, $uri)

@@ -139,13 +139,15 @@ class Request
 				}
 			}
 
+			$expiry = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
+
 			if($cacheRes !== FALSE && in_array($contentType, \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes') ?? ['text/html']))
 			{
 				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 					'response'  => $response
 					, 'request' => $request
 					, 'realUri' => $realUri
-				]);
+				], $expiry);
 			}
 
 			foreach($adaptersRev as $adapterClass)

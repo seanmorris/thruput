@@ -19,7 +19,8 @@
 		}
 	}
 	, "thruput": {
-		"adapters": [
+		"expiry": 60
+		, "adapters": [
 			"SeanMorris\\ThruPut\\Adapter\\Standard"
 		]
 	}
