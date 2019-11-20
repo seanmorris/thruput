@@ -1,17 +1,27 @@
 #!make
 
-include .env
+-include .env
 
 REPO    ?=r.cfcr.io/seanmorris
-TAG     ?=latest
-PROJECT ?=thruput
+PREFIX  ?=is.seanmorr.thruput
 TARGET  ?=development
+TAG     ?=`git describe --tags`-${TARGET}
+PROJECT ?=thruput
 YML_FILE?=infra/${TARGET}.yml
-COMPOSE ?=export REPO=${REPO} TAG=${TAG} TARGET=${TARGET} \
+COMPOSE ?=export REPO=${REPO} PREFIX=${PREFIX} TAG=${TAG} TARGET=${TARGET} \
 	&& docker-compose -f ${YML_FILE} -p ${PROJECT}
 
 build:
 	${COMPOSE} build
+	@ ${COMPOSE} up --no-start
+	@ ${COMPOSE} images -q | while read IMAGE_HASH; do \
+		docker image inspect --format="{{index .RepoTags 0}}" $$IMAGE_HASH \
+		| sed s/\:.*\$/// \
+		| grep "^${REPO}/${PREFIX}" \
+		| while read IMAGE_NAME; do \
+			docker tag $$IMAGE_HASH $$IMAGE_NAME:latest-${TARGET}; \
+		done; \
+	done;
 
 dependencies:
 	@ cd infra/ \
@@ -20,6 +30,7 @@ dependencies:
 		composer install --ignore-platform-reqs \
 			--no-interaction \
 			--prefer-source
+
 update-dependencies:
 	@ cd infra/ \
 	&& docker run --rm \
@@ -27,9 +38,6 @@ update-dependencies:
 		composer update --ignore-platform-reqs \
 			--no-interaction \
 			--prefer-source
-# 	&& docker build ../vendor/seanmorris/subspace/infra/ \
-# 		-f ../vendor/seanmorris/subspace/infra/socket.Dockerfile \
-# 		-t basic-socket:latest
 
 clean:
 	@ rm -rfv ./vendor/
@@ -53,6 +61,10 @@ restart-fg:
 	&& ${COMPOSE} up
 
 push:
+	make _push
+	make _push TAG=latest-${TARGET}
+
+_push:
 	${COMPOSE} push
 
 pull:

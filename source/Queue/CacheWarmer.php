@@ -49,8 +49,12 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 	public static function recieve($request)
 	{
-		\SeanMorris\Ids\Log::error($request);
+		\SeanMorris\Ids\Log::debug($request);
+
 		$origin    = \SeanMorris\Ids\Settings::read('origin');
+		$adapters  = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
+		$expiry    = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
+
 		$cacheHash = \SeanMorris\ThruPut\Cache::hash($request);
 
 		if($request['path'][0] == '/')
@@ -65,7 +69,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			, $url
 		));
 
-		\SeanMorris\Ids\Log::error(sprintf(
+		\SeanMorris\Ids\Log::debug(sprintf(
 		 	'Prerendering %s...'
 		 	, $url
 		));
@@ -79,15 +83,33 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		{
 			if($prerendered = static::$renderer->read())
 			{
-				\SeanMorris\Ids\Log::error($prerendered);
+				\SeanMorris\Ids\Log::debug($prerendered);
 			}
 
 			while($signaling = static::$renderer->readError())
 			{
-				\SeanMorris\Ids\Log::error($signaling);
+				\SeanMorris\Ids\Log::debug($signaling);
 			}
 
 		} while(!$prerendered);
+
+		if($adapters)
+		{
+			// foreach($adapters as $adapterClass)
+			// {
+			// 	$cacheRes = $adapterClass::onCache(
+			// 		$cacheHash
+			// 		, $request
+			// 		, $response
+			// 		, $realUri
+			// 	);
+
+			// 	if($cacheRes === FALSE)
+			// 	{
+			// 		break;
+			// 	}
+			// }
+		}
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [
@@ -96,7 +118,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			]
 			, 'request' => $request
 			, 'realUri' => $url
-		], -1);
+		], $expiry);
 
 		return TRUE;
 	}
