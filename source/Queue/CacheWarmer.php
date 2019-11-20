@@ -93,24 +93,6 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		} while(!$prerendered);
 
-		if($adapters)
-		{
-			// foreach($adapters as $adapterClass)
-			// {
-			// 	$cacheRes = $adapterClass::onCache(
-			// 		$cacheHash
-			// 		, $request
-			// 		, $response
-			// 		, $realUri
-			// 	);
-
-			// 	if($cacheRes === FALSE)
-			// 	{
-			// 		break;
-			// 	}
-			// }
-		}
-
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [
 				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
