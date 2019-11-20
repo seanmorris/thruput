@@ -36,9 +36,8 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 		\SeanMorris\Ids\Log::debug($header);
 
 		if(
-			$header->{'X-THRUPUT-PRERENDERED-AT'}?? FALSE
-
-			|| ($header->{'Content-Type'}?? FALSE) == 'text/html; charset=UTF-8'
+			$header->{'X-THRUPUT-PRERENDERED-AT'} ?? FALSE
+			|| ($header->{'Content-Type'} ?? FALSE) == 'text/html; charset=UTF-8'
 		){
 			$processors = static::processors();
 
@@ -62,7 +61,6 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 			$prefix = static::$prefix ? static::$prefix . PHP_EOL : NULL;
 
 			$collapse = $prefix . $dom->saveHTML();
-
 
 			$tidy = new \Tidy();
 			$tidy->parseString($collapse, [

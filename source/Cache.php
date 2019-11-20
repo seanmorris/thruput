@@ -50,7 +50,7 @@ class Cache
 			}
 		}
 
-		\SeanMorris\Ids\Log::error($response->response);
+		\SeanMorris\Ids\Log::info($response->response);
 
 		$_response           = clone $response;
 		$_response->response = clone $_response->response;

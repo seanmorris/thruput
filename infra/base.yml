@@ -3,17 +3,17 @@ version: '2.4'
 services:
 
   proxy:
-    image: "${REPO}/is.seanmorr.thruput.proxy:${TAG}-${TARGET}"
+    image: ${REPO}/${PREFIX}.proxy:${TAG}
     build:
       context: ../
       dockerfile: infra/proxy.Dockerfile
       target: ${TARGET}
     restart: always
     ports:
-      - "80:80"
+      - 80:80
 
   queue:
-    image: "${REPO}/is.seanmorr.thruput.queue:${TAG}-${TARGET}"
+    image: ${REPO}/${PREFIX}.queue:${TAG}
     build:
       context: ../
       dockerfile: infra/queue.Dockerfile
@@ -25,7 +25,7 @@ services:
     restart: always
 
   rabbit:
-    image: "rabbitmq:3-management"
+    image: rabbitmq:3-management
     restart: always
     environment:
       RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}

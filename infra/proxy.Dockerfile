@@ -7,6 +7,7 @@ COPY ./data/global/php/docker-php-app-thruput.ini /usr/local/etc/php/conf.d/dock
 RUN apt-get update \
 	&& docker-php-ext-install pdo pdo_mysql bcmath sockets \
 	&& a2enmod rewrite \
+	&& a2dismod alias -f \
 	&& a2ensite thruput
 
 RUN apt-get install -y --no-install-recommends git zip

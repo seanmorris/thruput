@@ -40,26 +40,6 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 		);
 	}
 
-	public static function onCache(&$cacheHash, $request, $response, $uri)
-	{
-		return;
-		$contentType = NULL;
-
-		if(isset($response->header, $response->header->{'Content-Type'}))
-		{
-			$contentType = strtok($response->header->{'Content-Type'}, ';');
-		}
-
-		if($contentType === 'text/html')
-		{
-			// return FALSE;
-		}
-
-		if(property_exists($response->header, 'HTTP/1.1 400 Bad Request'))
-		{
-		}
-	}
-
 	public static function onDisconnect($request, $response, $uri, $cacheHash, $cached = FALSE)
 	{
 		$contentType = NULL;
