@@ -21,9 +21,9 @@ class RootRoute implements \SeanMorris\Ids\Routable
 
 		header('Server: LETSVUE TECH 3');
 
-		if($_SERVER['REQUEST_METHOD'] ?? 0 === 'OPTIONS')
+		if(($_SERVER['REQUEST_METHOD'] ?? 0) === 'OPTIONS')
 		{
-			header('Content-length: ' . count($response));
+			header('Content-length: ' . strlen($response));
 			header('Allow: OPTIONS, GET, HEAD, POST');
 			return;
 		}

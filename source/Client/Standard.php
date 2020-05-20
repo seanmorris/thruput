@@ -33,6 +33,15 @@ class Standard extends \SeanMorris\ThruPut\Client
 		}
 
 		$response    = curl_exec($ch);
+		$error       = curl_error($ch);
+
+		if($error)
+		{
+			\SeanMorris\Ids\Log::warn($error);
+
+			return (object) [];
+		}
+
 
 		$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
 		$header      = substr($response, 0, $header_size);

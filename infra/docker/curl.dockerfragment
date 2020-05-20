@@ -1,0 +1,3 @@
+RUN set -eux;   \
+	apt update; \
+	apt install --no-install-recommends -y php${PHP}-curl

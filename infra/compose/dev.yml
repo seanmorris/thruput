@@ -34,4 +34,4 @@ services:
     ports:
       - "15672:15672"
     volumes:
-      - ../data/global/rabbitMq/enabled_plugins:/etc/rabbitmq/enabled_plugins
+      - ../rabbit/enabled_plugins:/etc/rabbitmq/enabled_plugins

@@ -7,7 +7,7 @@
         }
     ],
     "require": {
-        "seanmorris/ids": "dev-master",
+        "seanmorris/ids": "dev-sm-loader",
         "php-amqplib/php-amqplib": ">=2.6.1",
         "megahertz/guzzle-tor": "^1.0",
         "guzzlehttp/guzzle": "^6.3"

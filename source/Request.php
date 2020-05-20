@@ -45,6 +45,8 @@ class Request
 		$request     = static::skeleton(NULL, $origin);
 		$cacheHash   = \SeanMorris\ThruPut\Cache::hash($request);
 		$cache       = \SeanMorris\ThruPut\Cache::load($cacheHash);
+		$adapters    = (array) $adapters;
+
 		$adaptersRev = array_reverse($adapters ?? []);
 
 		$headers = [];
