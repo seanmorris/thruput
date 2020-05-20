@@ -1,0 +1,47 @@
+version: '2.4'
+
+services:
+
+  proxy:
+    image: ${REPO}/${PROJECT}.proxy:${TAG}
+    ports: ['80:8080']
+    build:
+      target: proxy-${TARGET}
+      context: ../../
+      dockerfile: ${ROOTRELDIR}infra/docker/proxy.___gen.dockerfile
+    extends:
+      file: ../../${CORERELDIR}infra/compose/base.yml
+      service: server
+
+  queue:
+    image: ${REPO}/${PROJECT}.queue:${TAG}
+    build:
+      target: queue-${TARGET}
+      context: ../../
+      dockerfile: ${ROOTRELDIR}infra/docker/queue.___gen.dockerfile
+    extends:
+      file: ../../${CORERELDIR}infra/compose/base.yml
+      service: idilic
+
+  idilic:
+    image: ${REPO}/${PROJECT}.idilic:${TAG}
+    build:
+      target: idilic-${TARGET}
+      context: ../../
+      dockerfile: ${ROOTRELDIR}infra/docker/queue.___gen.dockerfile
+    extends:
+      file: ../../${CORERELDIR}infra/compose/base.yml
+      service: idilic
+
+  redis:
+    image: redis:5.0
+    restart: always
+
+  rabbit:
+    image: rabbitmq:3-management
+    restart: always
+    environment:
+      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+      RABBITMQ_DEFAULT_USER:  ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS:  ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}

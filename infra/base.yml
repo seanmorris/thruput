@@ -1,34 +1,34 @@
-version: '2.4'
+# version: '2.4'
 
-services:
+# services:
 
-  proxy:
-    image: ${REPO}/${PREFIX}.proxy:${TAG}
-    build:
-      context: ../
-      dockerfile: infra/proxy.Dockerfile
-      target: ${TARGET}
-    restart: always
-    ports:
-      - 80:80
+#   proxy:
+#     image: ${REPO}/${PREFIX}.proxy:${TAG}
+#     build:
+#       context: ../
+#       dockerfile: infra/proxy.Dockerfile
+#       target: ${TARGET}
+#     restart: always
+#     ports:
+#       - 80:80
 
-  queue:
-    image: ${REPO}/${PREFIX}.queue:${TAG}
-    build:
-      context: ../
-      dockerfile: infra/queue.Dockerfile
-      target: ${TARGET}
-    restart: always
+#   queue:
+#     image: ${REPO}/${PREFIX}.queue:${TAG}
+#     build:
+#       context: ../
+#       dockerfile: infra/queue.Dockerfile
+#       target: ${TARGET}
+#     restart: always
 
-  redis:
-    image: redis:5.0
-    restart: always
+#   redis:
+#     image: redis:5.0
+#     restart: always
 
-  rabbit:
-    image: rabbitmq:3-management
-    restart: always
-    environment:
-      RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
-      RABBITMQ_DEFAULT_USER:  ${RABBITMQ_DEFAULT_USER}
-      RABBITMQ_DEFAULT_PASS:  ${RABBITMQ_DEFAULT_PASS}
-      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
+#   rabbit:
+#     image: rabbitmq:3-management
+#     restart: always
+#     environment:
+#       RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
+#       RABBITMQ_DEFAULT_USER:  ${RABBITMQ_DEFAULT_USER}
+#       RABBITMQ_DEFAULT_PASS:  ${RABBITMQ_DEFAULT_PASS}
+#       RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}

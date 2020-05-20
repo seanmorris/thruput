@@ -6,7 +6,7 @@ class RootRoute implements \SeanMorris\Ids\Routable
 	{
 		session_write_close();
 
-		return \SeanMorris\ThruPut\Request::handle(
+		$response = \SeanMorris\ThruPut\Request::handle(
 			\SeanMorris\Ids\Settings::read('origin')
 			, 'SeanMorris\ThruPut\Client\Standard' // 'SeanMorris\ThruPut\Client\Tor'
 			, \SeanMorris\Ids\Settings::read('thruput', 'adapters')
@@ -18,6 +18,17 @@ class RootRoute implements \SeanMorris\Ids\Routable
 			// 	// , 'SeanMorris\ThruPut\Adapter\Plain'
 			// ]
 		);
+
+		header('Server: LETSVUE TECH 3');
+
+		if($_SERVER['REQUEST_METHOD'] ?? 0 === 'OPTIONS')
+		{
+			header('Content-length: ' . count($response));
+			header('Allow: OPTIONS, GET, HEAD, POST');
+			return;
+		}
+
+		return $response;
 	}
 }
 

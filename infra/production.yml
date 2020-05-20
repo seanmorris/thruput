@@ -1,23 +1,23 @@
-version: '2.4'
+# version: '2.4'
 
-services:
+# services:
 
-  proxy:
-    extends:
-      file: base.yml
-      service: proxy
+#   proxy:
+#     extends:
+#       file: base.yml
+#       service: proxy
 
-  queue:
-    extends:
-      file: base.yml
-      service: queue
+#   queue:
+#     extends:
+#       file: base.yml
+#       service: queue
 
-  redis:
-    extends:
-      file: base.yml
-      service: redis
+#   redis:
+#     extends:
+#       file: base.yml
+#       service: redis
 
-  rabbit:
-    extends:
-      file: base.yml
-      service: rabbit
+#   rabbit:
+#     extends:
+#       file: base.yml
+#       service: rabbit

@@ -1,0 +1,14 @@
+RUN set -eux;   \
+	apt update; \
+	apt install --no-install-recommends -y wget php${PHP}-dev make php${PHP}-uuid; \
+	wget -O php-redis-5.2.1.tar.gz   https://github.com/phpredis/phpredis/archive/5.2.1.tar.gz; \
+	tar xzvf php-redis-5.2.1.tar.gz; \
+	pushd phpredis-5.2.1/; \
+	phpize;\
+	./configure; \
+	make; \
+	make install; \
+	popd;
+
+COPY $${ROOTRELDIR}infra/redis/30-redis.ini /etc/php/${PHP}/apache2/conf.d/30-redis.ini
+COPY $${ROOTRELDIR}infra/redis/30-redis.ini /etc/php/${PHP}/cli/conf.d/30-redis.ini
