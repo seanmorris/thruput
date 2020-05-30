@@ -180,3 +180,10 @@ COPY ${ROOTRELDIR}infra/redis/30-redis.ini /etc/php/7.4/cli/conf.d/30-redis.ini
 RUN set -eux;   \
 	apt update; \
 	apt install --no-install-recommends -y php7.4-curl
+
+COPY . /app
+WORKDIR /app
+
+RUN ls -al /app
+
+CMD ["-vv", "SeanMorris/ThruPut", "warmDaemon"]

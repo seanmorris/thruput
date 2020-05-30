@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dc405401d87588c1bd0dfa120add03f4",
+    "content-hash": "f0d7a220b41d96857bced0b4d28e174f",
     "packages": [
         {
             "name": "guzzlehttp/guzzle",
@@ -515,16 +515,16 @@
         },
         {
             "name": "seanmorris/ids",
-            "version": "dev-sm-loader",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/seanmorris/ids.git",
-                "reference": "7a4e51602003a0258a37ccf933e728828768ae29"
+                "reference": "422724395079473bb4be441038314974ce36201e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/seanmorris/ids/zipball/7a4e51602003a0258a37ccf933e728828768ae29",
-                "reference": "7a4e51602003a0258a37ccf933e728828768ae29",
+                "url": "https://api.github.com/repos/seanmorris/ids/zipball/422724395079473bb4be441038314974ce36201e",
+                "reference": "422724395079473bb4be441038314974ce36201e",
                 "shasum": ""
             },
             "require-dev": {
@@ -549,7 +549,7 @@
                     "email": "sean@sean-morris.com"
                 }
             ],
-            "time": "2020-05-19T20:49:54+00:00"
+            "time": "2020-05-20T23:51:27+00:00"
         },
         {
             "name": "symfony/polyfill-intl-idn",

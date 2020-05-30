@@ -163,6 +163,11 @@ FROM server-base AS server-prod
 
 FROM server-test AS proxy-test
 
+COPY . /app
+WORKDIR /app
+
+RUN ls -al /app
+
 RUN set -eux;   \
 	apt update; \
 	apt install --no-install-recommends -y wget php7.4-dev make php7.4-uuid; \
