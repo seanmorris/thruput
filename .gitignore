@@ -1,1 +1,4 @@
 vendor/
+.lock_env*
+.var*
+.env*
