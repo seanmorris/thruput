@@ -143,7 +143,11 @@ class Request
 
 			$expiry = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
 
-			if($cacheRes !== FALSE && in_array($contentType, \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes') ?? ['text/html']))
+			$cachable = \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes');
+
+			$cachable = $cachable->dumpStruct();
+
+			if($cacheRes !== FALSE && in_array($contentType, $cachable ?? ['text/html']))
 			{
 				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 					'response'  => $response
