@@ -74,24 +74,26 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		 	, $url
 		));
 
-		static::$renderer->write($url . PHP_EOL);
-
 		$prerendered = NULL;
 		$signaling   = NULL;
 
 		do
 		{
+			while($signaling = static::$renderer->readError())
+			{
+				\SeanMorris\Ids\Log::debug($signaling);
+
+				fwrite(STDERR, $signaling);
+			}
+
 			if($prerendered = static::$renderer->read())
 			{
 				\SeanMorris\Ids\Log::debug($prerendered);
 			}
 
-			while($signaling = static::$renderer->readError())
-			{
-				\SeanMorris\Ids\Log::debug($signaling);
-			}
-
 		} while(!$prerendered);
+
+		static::$renderer->write($url . PHP_EOL);
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [

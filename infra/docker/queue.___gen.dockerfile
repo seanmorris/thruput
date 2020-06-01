@@ -184,6 +184,9 @@ RUN set -eux;   \
 COPY . /app
 WORKDIR /app
 
-RUN ls -al /app
+RUN apt install nodejs npm --no-install-recommends -y && npm i -g prenderer@1.1.2
+
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+	&& apt install ./google-chrome-stable_current_amd64.deb --no-install-recommends -y
 
 CMD ["-vv", "SeanMorris/ThruPut", "warmDaemon"]
