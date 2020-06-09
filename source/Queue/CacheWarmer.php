@@ -45,6 +45,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
 			'prenderer --streaming --timeout=750'
 			, TRUE
+			, TRUE
 		);
 	}
 
@@ -84,6 +85,8 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		$signaling   = NULL;
 		$decoded     = NULL;
 
+		static::$renderer->write($url . PHP_EOL);
+
 		do
 		{
 			while($signaling = static::$renderer->readError())
@@ -96,7 +99,6 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			while($p = static::$renderer->read())
 			{
 				$prerendered .= $p;
-				usleep(1000);
 			}
 
 			if($prerendered)
@@ -116,8 +118,6 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			}
 
 		} while(!$prerendered);
-
-		static::$renderer->write($url . PHP_EOL);
 
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'response'  => (object) [
