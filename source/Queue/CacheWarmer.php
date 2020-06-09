@@ -89,6 +89,8 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		do
 		{
+			sleep(1);
+
 			while($signaling = static::$renderer->readError())
 			{
 				\SeanMorris\Ids\Log::debug($signaling);
