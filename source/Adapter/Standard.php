@@ -88,7 +88,7 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			return;
 		}
 
-		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::rpc($request);
+		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::send($request);
 
 		// $time = time();
 
