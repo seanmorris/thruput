@@ -90,28 +90,29 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::rpc($request);
 
-		$time = time();
+		// $time = time();
 
-		while(TRUE)
-		{
-			if(time() - $time > 15)
-			{
-				break;
-			}
+		// while(TRUE)
+		// {
+		// 	if(time() - $time > 5)
+		// 	{
+		// 		break;
+		// 	}
 
-			if($message = $returner())
-			{
-				\SeanMorris\Ids\Log::debug($message);
-				if(is_object($message)
-					&& $message->response ?? FALSE
-					&& is_object($message->response)
-					&& $message->response->body ?? FALSE
-				){
-					$response->body = $message->response->body;
-					break;
-				}
-			}
-		}
+		// 	if($message = $returner())
+		// 	{
+		// 		\SeanMorris\Ids\Log::debug($message);
+		// 		if(is_object($message)
+		// 			&& $message->response ?? FALSE
+		// 			&& is_object($message->response)
+		// 			&& $message->response->body ?? FALSE
+		// 		){
+		// 			$response->body = $message->response->body;
+		// 			break;
+		// 		}
+		// 	}
+		// }
+
 		// $contentType = NULL;
 
 		// if(isset($response->header, $response->header->{'Content-Type'}))
