@@ -2,7 +2,7 @@
 namespace SeanMorris\ThruPut\Queue;
 class CacheWarmer extends \SeanMorris\Ids\Queue
 {
-	const CHANNEL_NO_ACK = FALSE;
+	const CHANNEL_NO_ACK = FALSE, ASYNC = TRUE, RPC = TRUE;
 
 	protected static $renderer;
 
@@ -43,7 +43,8 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 	public static function init()
 	{
 		static::$renderer = new \SeanMorris\Ids\ChildProcess(
-			'prenderer --streaming', TRUE
+			'prenderer --streaming --timeout=750'
+			, TRUE
 		);
 	}
 
@@ -65,6 +66,11 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		}
 
 		fwrite(STDERR, sprintf(
+			'Origin %s...' . PHP_EOL
+			, $origin
+		));
+
+		fwrite(STDERR, sprintf(
 			'Prerendering %s...' . PHP_EOL
 			, $url
 		));
@@ -76,6 +82,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		$prerendered = NULL;
 		$signaling   = NULL;
+		$decoded     = NULL;
 
 		do
 		{
@@ -86,12 +93,29 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 				fwrite(STDERR, $signaling);
 			}
 
-			if($prerendered = static::$renderer->read())
+			while($p = static::$renderer->read())
 			{
-				\SeanMorris\Ids\Log::debug($prerendered);
+				$prerendered .= $p;
+				usleep(1000);
 			}
 
-		} while(!$prerendered);
+			if($prerendered)
+			{
+				$decoded = json_decode($prerendered);
+
+				\SeanMorris\Ids\Log::debug($decoded);
+
+				if($error = json_last_error())
+				{
+					\SeanMorris\Ids\Log::debug(
+						$error
+						, json_last_error_msg()
+						, $prerendered
+					);
+				}
+			}
+
+		} while(!$decoded);
 
 		static::$renderer->write($url . PHP_EOL);
 
@@ -104,6 +128,24 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 			, 'realUri' => $url
 		], $expiry);
 
-		return TRUE;
+		if($decoded)
+		{
+			$cached = (object)[
+				'response'  => (object) [
+					'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
+					, 'body' => $decoded
+				]
+				, 'request' => $request
+				, 'realUri' => $url
+			];
+
+			\SeanMorris\Ids\Log::info('CACHING', $cached);
+
+			$expiry = \SeanMorris\Ids\Settings::read('cacheTime') ?? 60;
+
+			\SeanMorris\ThruPut\Cache::store($cacheHash, $cached, $expiry);
+
+			return $cached;
+		}
 	}
 }

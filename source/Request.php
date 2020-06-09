@@ -61,7 +61,7 @@ class Request
 
 		$realUri = static::uri($origin, $request);
 
-		foreach($adaptersRev as $adapterClass)
+		foreach($adapters as $adapterClass)
 		{
 			$reqRes = $adapterClass::onRequest($request, $realUri, $headers);
 
@@ -73,22 +73,27 @@ class Request
 
 		$return = '';
 
+		$scope = (object) [
+			'expiry'  => \SeanMorris\Ids\Settings::read('cacheTime') ?? 60
+			, 'cache' => $cache
+		];
+
 		if($cache)
 		{
 			\SeanMorris\Ids\Log::debug('CACHE HIT!', $cacheHash);
-
-			\SeanMorris\Ids\Log::debug((int)!!$cache);
 
 			if($adapters)
 			{
 				foreach($adapters as $adapterClass)
 				{
+					\SeanMorris\Ids\Log::debug('CACHE HIT!', $adapterClass);
+
 					$respRes = $adapterClass::onResponse(
 						$request
-						, $cache->meta->response
+						, $cache->meta('response')
 						, $realUri
+						, $scope
 						, $cacheHash
-						, TRUE
 					);
 
 					if($respRes === FALSE)
@@ -98,9 +103,9 @@ class Request
 				}
 			}
 
-			static::sendHeaders($cache->meta->response->header);
+			static::sendHeaders($cache->meta('response')->header);
 
-			$response = $cache->meta->response;
+			$response = $cache->meta('response');
 
 			$cache->readOut(function($chunk) use(&$return){
 				$return .= $chunk;
@@ -123,43 +128,28 @@ class Request
 
 			$cacheRes = NULL;
 
-			if($adapters)
+			if($cacheRes !== FALSE && in_array($contentType, \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes') ?? ['text/html']))
 			{
-				foreach($adapters as $adapterClass)
-				{
-					$cacheRes = $adapterClass::onCache(
-						$cacheHash
-						, $request
-						, $response
-						, $realUri
-					);
-
-					if($cacheRes === FALSE)
-					{
-						break;
-					}
-				}
+				\SeanMorris\ThruPut\Cache::store(
+					$cacheHash
+					, (object)[
+						'response'  => $response
+						, 'request' => $request
+						, 'realUri' => $realUri
+					]
+					, $scope->expiry
+				);
 			}
 
-			$expiry = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
-
-			$cachable = (array) \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes');
-
-			if($cacheRes !== FALSE && in_array($contentType, $cachable ?? ['text/html']))
+			foreach($adapters as $adapterClass)
 			{
-				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
-					'response'  => $response
-					, 'request' => $request
-					, 'realUri' => $realUri
-				], $expiry);
-			}
+				// \SeanMorris\Ids\Log::error('CACHE HIT!', $adapterClass, $response,$scope);
 
-			foreach($adaptersRev as $adapterClass)
-			{
 				$respRes = $adapterClass::onResponse(
 					$request
 					, $response
 					, $realUri
+					, $scope
 					, FALSE
 				);
 

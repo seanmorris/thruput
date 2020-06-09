@@ -20,8 +20,8 @@ class RootRoute implements \SeanMorris\Ids\Routable
 			, $origin
 		);
 
-		$response  = \SeanMorris\ThruPut\Client\Standard::request($realUri);
 		$xml       = new \XMLReader();
+		$response  = \SeanMorris\ThruPut\Client\Standard::request($realUri);
 
 		$xml->xml($response->body);
 
@@ -55,9 +55,7 @@ class RootRoute implements \SeanMorris\Ids\Routable
 				\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 					'response'  => $response
 					, 'request' => $skeleton
-				]);
-
-				var_dump($cacheHash);
+				], \SeanMorris\Ids\Settings::read('cacheTime') ?? 60);
 			}
 		}
 	}
