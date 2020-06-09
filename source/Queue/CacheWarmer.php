@@ -2,7 +2,7 @@
 namespace SeanMorris\ThruPut\Queue;
 class CacheWarmer extends \SeanMorris\Ids\Queue
 {
-	const CHANNEL_NO_ACK = FALSE, ASYNC = TRUE, RPC = TRUE;
+	const CHANNEL_NO_ACK = FALSE, ASYNC = FALSE, RPC = FALSE;
 
 	protected static $renderer;
 
@@ -115,7 +115,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 				}
 			}
 
-		} while(!$decoded);
+		} while(!$prerendered);
 
 		static::$renderer->write($url . PHP_EOL);
 
