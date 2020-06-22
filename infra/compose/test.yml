@@ -23,8 +23,11 @@ services:
     extends:
       file: base.yml
       service: redis
-    ports:
-      - "6379:6379"
+
+  prerenderer:
+    extends:
+      file: base.yml
+      service: prerenderer
 
   rabbit:
     extends:

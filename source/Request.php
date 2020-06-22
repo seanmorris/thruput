@@ -128,7 +128,19 @@ class Request
 
 			$cacheRes = NULL;
 
-			if($cacheRes !== FALSE && in_array($contentType, \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes') ?? ['text/html']))
+			$cacheableTypes = \SeanMorris\Ids\Settings::read('thruput', 'cacheableTypes');
+
+			if($cacheableTypes)
+			{
+				$cacheableTypes = (array) $cacheableTypes;
+			}
+			else
+			{
+				$cacheableTypes = [];
+			}
+
+
+			if($cacheRes !== FALSE && in_array($contentType, $cacheableTypes ?: ['text/html']))
 			{
 				\SeanMorris\ThruPut\Cache::store(
 					$cacheHash

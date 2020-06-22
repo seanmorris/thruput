@@ -27,9 +27,7 @@ class Xpath extends \SeanMorris\ThruPut\Adapter
 	{
 		$header = (object) $response->header;
 
-		if(
-			$header->{'X-THRUPUT-PRERENDERED-AT'}?? FALSE
-
+		if(($header->{'X-THRUPUT-PRERENDERED-AT'}??FALSE)
 			|| ($header->{'Content-Type'}?? FALSE) == 'text/html; charset=UTF-8'
 		){
 			$processors = static::responseProcessors();

@@ -42,21 +42,18 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 	public static function init()
 	{
-		static::$renderer = new \SeanMorris\Ids\ChildProcess(
-			'prenderer --streaming --timeout=750'
-			, TRUE
-			, TRUE
-		);
+		// static::$renderer = new \SeanMorris\Ids\ChildProcess(
+		// 	'prenderer --streaming --timeout=750'
+		// 	, TRUE
+		// 	, TRUE
+		// );
 	}
 
 	public static function recieve($request)
 	{
-		\SeanMorris\Ids\Log::debug($request);
-
 		$origin    = \SeanMorris\Ids\Settings::read('origin');
 		$adapters  = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
 		$expiry    = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
-
 		$cacheHash = \SeanMorris\ThruPut\Cache::hash($request);
 
 		if($request['path'][0] == '/')
@@ -65,89 +62,52 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 			$url = $origin . '/'. $request['path'];
 		}
+		else
+		{
+			return;
+		}
 
-		fwrite(STDERR, sprintf(
-			'Origin %s...' . PHP_EOL
-			, $origin
-		));
-
-		fwrite(STDERR, sprintf(
-			'Prerendering %s...' . PHP_EOL
-			, $url
-		));
-
-		\SeanMorris\Ids\Log::debug(sprintf(
+		\SeanMorris\Ids\Log::info(sprintf(
 		 	'Prerendering %s...'
 		 	, $url
 		));
 
-		$prerendered = NULL;
-		$signaling   = NULL;
-		$decoded     = NULL;
+		$client   = new \GuzzleHttp\Client();
+		$response = $client->get('http://prerenderer:3000/' . $url);
 
-		static::$renderer->write($url . PHP_EOL);
-
-		do
+		if($response->getStatusCode() == '200')
 		{
-			sleep(1);
+			\SeanMorris\Ids\Log::info($cacheHash);
 
-			while($signaling = static::$renderer->readError())
-			{
-				\SeanMorris\Ids\Log::debug($signaling);
-
-				fwrite(STDERR, $signaling);
-			}
-
-			while($p = static::$renderer->read())
-			{
-				$prerendered .= $p;
-			}
-
-			if($prerendered)
-			{
-				$decoded = json_decode($prerendered);
-
-				\SeanMorris\Ids\Log::debug($decoded);
-
-				if($error = json_last_error())
-				{
-					\SeanMorris\Ids\Log::debug(
-						$error
-						, json_last_error_msg()
-						, $prerendered
-					);
-				}
-			}
-
-		} while(!$prerendered);
-
-		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
-			'response'  => (object) [
-				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
-				, 'body' => json_decode($prerendered)
-			]
-			, 'request' => $request
-			, 'realUri' => $url
-		], $expiry);
-
-		if($decoded)
-		{
-			$cached = (object)[
-				'response'  => (object) [
+			\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
+				'realUri'    => $url
+				, 'request'  => $request
+				, 'response' => (object) [
 					'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
-					, 'body' => $decoded
+					, 'body' => $response->getBody()->getContents()
 				]
-				, 'request' => $request
-				, 'realUri' => $url
-			];
-
-			\SeanMorris\Ids\Log::info('CACHING', $cached);
-
-			$expiry = \SeanMorris\Ids\Settings::read('cacheTime') ?? 60;
-
-			\SeanMorris\ThruPut\Cache::store($cacheHash, $cached, $expiry);
-
-			return $cached;
+			], $expiry);
 		}
+
+
+		// if($decoded)
+		// {
+		// 	$cached = (object)[
+		// 		'response'  => (object) [
+		// 			'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
+		// 			, 'body' => $decoded
+		// 		]
+		// 		, 'request' => $request
+		// 		, 'realUri' => $url
+		// 	];
+
+		// 	\SeanMorris\Ids\Log::info('CACHING', $cached);
+
+		// 	$expiry = \SeanMorris\Ids\Settings::read('cacheTime') ?? 60;
+
+		// 	\SeanMorris\ThruPut\Cache::store($cacheHash, $cached, $expiry);
+
+		// 	return $cached;
+		// }
 	}
 }

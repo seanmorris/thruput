@@ -33,6 +33,13 @@ services:
       file: ../../${CORERELDIR}infra/compose/base.yml
       service: idilic
 
+  prerenderer:
+    image: ${REPO}/${PROJECT}.prerenderer:${TAG}
+    build:
+      context: ../../
+      dockerfile: infra/docker/prerenderer.Dockerfile
+    restart: always
+
   redis:
     image: redis:5.0
     restart: always

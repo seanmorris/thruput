@@ -27,6 +27,13 @@ services:
     ports:
       - "6379:6379"
 
+  prerenderer:
+    extends:
+      file: base.yml
+      service: prerenderer
+    ports:
+      - "3000:3000"
+
   rabbit:
     extends:
       file: base.yml
