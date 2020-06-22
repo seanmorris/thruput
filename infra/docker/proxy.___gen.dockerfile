@@ -161,7 +161,7 @@ COPY ${CORERELDIR}/infra/xdebug/30-xdebug-apache.ini /etc/php/7.4/apache2/conf.d
 
 FROM server-base AS server-prod
 
-FROM server-test AS proxy-test
+FROM server-dev AS proxy-dev
 
 COPY . /app
 WORKDIR /app

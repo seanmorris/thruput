@@ -161,7 +161,7 @@ COPY ${CORERELDIR}/infra/xdebug/30-xdebug-apache.ini /etc/php/7.4/apache2/conf.d
 
 FROM server-base AS server-prod
 
-FROM idilic-test AS queue-test
+FROM idilic-dev AS queue-dev
 
 RUN set -eux;   \
 	apt update; \

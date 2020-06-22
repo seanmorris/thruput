@@ -54,6 +54,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		$origin    = \SeanMorris\Ids\Settings::read('origin');
 		$adapters  = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
 		$expiry    = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
+		$cachable  = \SeanMorris\Ids\Settings::read('thruput', 'cachableTypes');
 		$cacheHash = \SeanMorris\ThruPut\Cache::hash($request);
 
 		if($request['path'][0] == '/')
@@ -75,19 +76,30 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		$client   = new \GuzzleHttp\Client();
 		$response = $client->get('http://prerenderer:3000/' . $url);
 
-		if($response->getStatusCode() == '200')
+		if($response->getStatusCode() != 200)
 		{
-			\SeanMorris\Ids\Log::info($cacheHash);
-
-			\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
-				'realUri'    => $url
-				, 'request'  => $request
-				, 'response' => (object) [
-					'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
-					, 'body' => $response->getBody()->getContents()
-				]
-			], $expiry);
+			return;
 		}
+
+		$contentType = strtok($response->getHeader('Content-Type')[0] ?? '', ';');
+
+		\SeanMorris\Ids\Log::info($contentType, $cachable);
+
+		if(!in_array($contentType, $cachable))
+		{
+			return;
+		}
+
+		\SeanMorris\Ids\Log::info($cacheHash);
+
+		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
+			'realUri'    => $url
+			, 'request'  => $request
+			, 'response' => (object) [
+				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
+				, 'body' => $response->getBody()->getContents()
+			]
+		], $expiry);
 
 
 		// if($decoded)

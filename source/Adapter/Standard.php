@@ -53,12 +53,6 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			\SeanMorris\Ids\Log::info($scope->cache->meta('meta'));
 			$response->header->{'X-THRUPUT-TTL'} = $scope->cache->meta('meta')->expiry - time();
 		}
-
-		if($cached || !in_array($contentType, ['text/html']))
-		{
-			\SeanMorris\Ids\Log::debug('Aww...');
-			return;
-		}
 	}
 
 	public static function onCache(&$cacheHash, $request, $response, $uri, $scope)
@@ -85,6 +79,21 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 	{
 		if($cached)
 		{
+			return;
+		}
+
+		$contentType = NULL;
+
+		if(isset($response->header, $response->header->{'Content-Type'}))
+		{
+			$contentType = strtok($response->header->{'Content-Type'}, ';');
+		}
+
+		$cachable = \SeanMorris\Ids\Settings::read('thruput', 'cachableTypes');
+
+		if(!in_array($contentType, $cachable))
+		{
+			\SeanMorris\Ids\Log::debug('Aww...');
 			return;
 		}
 
