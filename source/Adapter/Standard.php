@@ -53,6 +53,53 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 			\SeanMorris\Ids\Log::info($scope->cache->meta('meta'));
 			$response->header->{'X-THRUPUT-TTL'} = $scope->cache->meta('meta')->expiry - time();
 		}
+
+		$contentType = NULL;
+
+		if(isset($response->header, $response->header->{'Content-Type'}))
+		{
+			$contentType = strtok($response->header->{'Content-Type'}, ';');
+		}
+
+		$cachable = \SeanMorris\Ids\Settings::read('thruput', 'cachable');
+
+		$cachable = $cachable->dumpStruct();
+
+		if(!in_array($contentType, $cachable))
+		{
+			\SeanMorris\Ids\Log::debug('Aww...');
+			return;
+		}
+
+		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::rpc($request);
+
+		$time = time();
+
+		while(TRUE)
+		{
+			if($message = $returner())
+			{
+				\SeanMorris\Ids\Log::error($response, $message);
+
+				if(is_object($message)
+					&& is_object($message)
+					&& $message->body ?? FALSE
+				){
+					$response->body = $message->body;
+
+					\SeanMorris\Ids\Log::error($response);
+					break;
+				}
+
+				break;
+
+			}
+
+			if(time() - $time > 15)
+			{
+				break;
+			}
+		}
 	}
 
 	public static function onCache(&$cacheHash, $request, $response, $uri, $scope)
@@ -77,66 +124,6 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 	public static function onDisconnect($request, $response, $uri, $cacheHash, $cached = FALSE)
 	{
-		if($cached)
-		{
-			return;
-		}
-
-		$contentType = NULL;
-
-		if(isset($response->header, $response->header->{'Content-Type'}))
-		{
-			$contentType = strtok($response->header->{'Content-Type'}, ';');
-		}
-
-		$cachable = \SeanMorris\Ids\Settings::read('thruput', 'cachableTypes');
-
-		if(!in_array($contentType, $cachable))
-		{
-			\SeanMorris\Ids\Log::debug('Aww...');
-			return;
-		}
-
-		$returner = \SeanMorris\ThruPut\Queue\CacheWarmer::send($request);
-
-		// $time = time();
-
-		// while(TRUE)
-		// {
-		// 	if(time() - $time > 5)
-		// 	{
-		// 		break;
-		// 	}
-
-		// 	if($message = $returner())
-		// 	{
-		// 		\SeanMorris\Ids\Log::debug($message);
-		// 		if(is_object($message)
-		// 			&& $message->response ?? FALSE
-		// 			&& is_object($message->response)
-		// 			&& $message->response->body ?? FALSE
-		// 		){
-		// 			$response->body = $message->response->body;
-		// 			break;
-		// 		}
-		// 	}
-		// }
-
-		// $contentType = NULL;
-
-		// if(isset($response->header, $response->header->{'Content-Type'}))
-		// {
-		// 	$contentType = strtok($response->header->{'Content-Type'}, ';');
-		// }
-
-		// \SeanMorris\Ids\Log::debug($cached, $contentType);
-
-		// if($cached || !in_array($contentType, ['text/html']))
-		// {
-		// 	\SeanMorris\Ids\Log::debug('Aww...');
-		// 	return;
-		// }
-
 		// \SeanMorris\ThruPut\Queue\CacheWarmer::send($request);
 	}
 }

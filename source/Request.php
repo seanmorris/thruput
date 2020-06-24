@@ -45,7 +45,7 @@ class Request
 		$request     = static::skeleton(NULL, $origin);
 		$cacheHash   = \SeanMorris\ThruPut\Cache::hash($request);
 		$cache       = \SeanMorris\ThruPut\Cache::load($cacheHash);
-		$adapters    = (array) $adapters;
+		$adapters    = $adapters->dumpStruct();
 
 		$adaptersRev = array_reverse($adapters ?? []);
 
@@ -73,8 +73,10 @@ class Request
 
 		$return = '';
 
+		$expiryConfig = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
+
 		$scope = (object) [
-			'expiry'  => \SeanMorris\Ids\Settings::read('cacheTime') ?? 60
+			'expiry'  => $expiryConfig ?? 60
 			, 'cache' => $cache
 		];
 
@@ -155,8 +157,6 @@ class Request
 
 			foreach($adapters as $adapterClass)
 			{
-				// \SeanMorris\Ids\Log::error('CACHE HIT!', $adapterClass, $response,$scope);
-
 				$respRes = $adapterClass::onResponse(
 					$request
 					, $response

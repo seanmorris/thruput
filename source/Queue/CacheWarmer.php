@@ -2,7 +2,7 @@
 namespace SeanMorris\ThruPut\Queue;
 class CacheWarmer extends \SeanMorris\Ids\Queue
 {
-	const CHANNEL_NO_ACK = FALSE, ASYNC = FALSE, RPC = FALSE;
+	const CHANNEL_NO_ACK = FALSE, ASYNC = TRUE, RPC = TRUE;
 
 	protected static $renderer;
 
@@ -54,8 +54,17 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		$origin    = \SeanMorris\Ids\Settings::read('origin');
 		$adapters  = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
 		$expiry    = \SeanMorris\Ids\Settings::read('thruput', 'expiry');
-		$cachable  = \SeanMorris\Ids\Settings::read('thruput', 'cachableTypes');
 		$cacheHash = \SeanMorris\ThruPut\Cache::hash($request);
+		$cachable  = \SeanMorris\Ids\Settings::read('thruput', 'cachable');
+
+		if($cachable)
+		{
+			$cachable = $cachable->dumpStruct();
+		}
+		else
+		{
+			$cachable = [];
+		}
 
 		if($request['path'][0] == '/')
 		{
@@ -92,15 +101,20 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 
 		\SeanMorris\Ids\Log::info($cacheHash);
 
+		$body = $response->getBody()->getContents();
+
+		$newResponse = (object) [
+			'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
+			, 'body' => $body
+		];
+
 		\SeanMorris\ThruPut\Cache::store($cacheHash, (object)[
 			'realUri'    => $url
 			, 'request'  => $request
-			, 'response' => (object) [
-				'header' => ['X-THRUPUT-PRERENDERED-AT' => time()]
-				, 'body' => $response->getBody()->getContents()
-			]
+			, 'response' => $newResponse
 		], $expiry);
 
+		return $newResponse;
 
 		// if($decoded)
 		// {
