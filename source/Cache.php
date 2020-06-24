@@ -22,7 +22,7 @@ class Cache
 
 	public static function store($hash, $content, $time = 86400)
 	{
-		\SeanMorris\Ids\Log::info($hash, $content, $time);
+		// \SeanMorris\Ids\Log::info($hash, $content, $time);
 
 		$adapters = \SeanMorris\Ids\Settings::read('thruput', 'adapters');
 
@@ -48,7 +48,7 @@ class Cache
 			}
 		}
 
-		\SeanMorris\Ids\Log::info($content->response);
+		// \SeanMorris\Ids\Log::info($content->response);
 
 		$_content           = clone $content;
 		$_content->hash     = $hash;
