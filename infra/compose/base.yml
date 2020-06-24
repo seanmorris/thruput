@@ -23,16 +23,6 @@ services:
       file: ../../${CORERELDIR}infra/compose/base.yml
       service: idilic
 
-  idilic:
-    image: ${REPO}/${PROJECT}.idilic:${TAG}
-    build:
-      target: idilic-${TARGET}
-      context: ../../
-      dockerfile: ${ROOTRELDIR}infra/docker/queue.___gen.dockerfile
-    extends:
-      file: ../../${CORERELDIR}infra/compose/base.yml
-      service: idilic
-
   prerenderer:
     image: ${REPO}/${PROJECT}.prerenderer:${TAG}
     build:

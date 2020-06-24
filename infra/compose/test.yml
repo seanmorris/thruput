@@ -1,6 +1,7 @@
 version: '2.4'
 
 services:
+
   proxy:
     extends:
       file: base.yml
@@ -11,12 +12,6 @@ services:
     extends:
       file: base.yml
       service: queue
-    volumes: ["../../:/app"]
-
-  idilic:
-    extends:
-      file: base.yml
-      service: idilic
     volumes: ["../../:/app"]
 
   redis:
