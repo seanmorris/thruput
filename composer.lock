@@ -519,12 +519,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/seanmorris/ids.git",
-                "reference": "3d7aa58014cbf87450b4265806011713d8f44b12"
+                "reference": "06c55f6af3df1c0c49b483d0359f1f063c2ccc49"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/seanmorris/ids/zipball/3d7aa58014cbf87450b4265806011713d8f44b12",
-                "reference": "3d7aa58014cbf87450b4265806011713d8f44b12",
+                "url": "https://api.github.com/repos/seanmorris/ids/zipball/06c55f6af3df1c0c49b483d0359f1f063c2ccc49",
+                "reference": "06c55f6af3df1c0c49b483d0359f1f063c2ccc49",
                 "shasum": ""
             },
             "require-dev": {
@@ -549,7 +549,7 @@
                     "email": "sean@sean-morris.com"
                 }
             ],
-            "time": "2020-06-23T21:47:29+00:00"
+            "time": "2020-06-24T19:18:16+00:00"
         },
         {
             "name": "symfony/polyfill-intl-idn",

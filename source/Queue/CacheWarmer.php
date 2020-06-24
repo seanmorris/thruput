@@ -57,7 +57,7 @@ class CacheWarmer extends \SeanMorris\Ids\Queue
 		$cacheHash = \SeanMorris\ThruPut\Cache::hash($request);
 		$cachable  = \SeanMorris\Ids\Settings::read('thruput', 'cachable');
 
-		if($cachable)
+		if(is_object($cachable) && method_exists($cachable, 'dumpStruct'))
 		{
 			$cachable = $cachable->dumpStruct();
 		}

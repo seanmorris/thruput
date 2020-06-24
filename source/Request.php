@@ -45,7 +45,11 @@ class Request
 		$request     = static::skeleton(NULL, $origin);
 		$cacheHash   = \SeanMorris\ThruPut\Cache::hash($request);
 		$cache       = \SeanMorris\ThruPut\Cache::load($cacheHash);
-		$adapters    = $adapters->dumpStruct();
+
+		if(is_object($adapters) && method_exists($adapters, 'dumpStruct'))
+		{
+			$adapters = $adapters->dumpStruct();
+		}
 
 		$adaptersRev = array_reverse($adapters ?? []);
 

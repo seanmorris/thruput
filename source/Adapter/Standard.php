@@ -63,7 +63,10 @@ class Standard extends \SeanMorris\ThruPut\Adapter
 
 		$cachable = \SeanMorris\Ids\Settings::read('thruput', 'cachable');
 
-		$cachable = $cachable->dumpStruct();
+		if(is_object($cachable) && method_exists($cachable, 'dumpStruct'))
+		{
+			$cachable = $cachable->dumpStruct();
+		}
 
 		if(!in_array($contentType, $cachable))
 		{
